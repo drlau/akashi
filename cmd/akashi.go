@@ -3,10 +3,10 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
-	"github.com/hashicorp/terraform-json"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 
@@ -54,43 +54,28 @@ func run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: determine input
-	// if file != "" {
+	var in []plan.ResourceChange
+	var data io.Reader
 
-	// }
-	// else stdin
-
-	in := []plan.ResourceChange{}
-	// if json {
-	// for _, rc := range p.ResourceChanges {
-	// 	in = append(in, plan.NewResourceChangeFromJSON(rc))
-	// }
-	// }
-	// else vision
-
-	p := &tfjson.Plan{}
 	if file != "" {
-		data, err := ioutil.ReadFile(file)
+		data, err = os.Open(file)
 		if err != nil {
-			panic(err)
-		}
-		err = p.UnmarshalJSON(data)
-		if err != nil {
-			panic(err)
+			return err
 		}
 	} else {
-		data, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			panic(err)
-		}
-		err = p.UnmarshalJSON(data)
-		if err != nil {
-			panic(err)
-		}
+		data = os.Stdin
 	}
 
-	for _, rc := range p.ResourceChanges {
-		in = append(in, plan.NewResourceChangeFromJSON(rc))
+	if json {
+		in, err = plan.NewResourcePlanFromJSON(data)
+		if err != nil {
+			return err
+		}
+	} else {
+		in, err = plan.NewResourcePlanFromPlanOutput(data)
+		if err != nil {
+			return err
+		}
 	}
 
 	comparers := make(map[string]compare.Comparer)
