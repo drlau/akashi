@@ -120,22 +120,22 @@ func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
 	if opts.EnforceAll && len(cmp.MissingEnforced) > 0 {
 		buf.WriteString(utils.RedBold("Missing enforced arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
-			buf.WriteString(utils.Red(fmt.Sprintf("  - %s\n", arg)))
+			buf.WriteString(utils.Red(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
 	if !opts.IgnoreExtraArgs && len(cmp.Extra) != 0 {
 		buf.WriteString(utils.YellowBold("Extra arguments:\n"))
 		for arg, _ := range cmp.Extra {
-			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
 	if opts.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
 		buf.WriteString(utils.YellowBold("Missing enforced and ignored arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
-			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 		for arg, _ := range cmp.MissingIgnored {
-			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
 
@@ -144,9 +144,9 @@ func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
 		for k, v := range cmp.Failed {
 			f := v.(FailedArg)
 
-			buf.WriteString(utils.RedBold(fmt.Sprintf("  - %s\n", k)))
-			buf.WriteString(utils.Green(fmt.Sprintf("    + Expected: %s\n", f.Expected)))
-			buf.WriteString(utils.Red(fmt.Sprintf("    - Actual:   %s\n", f.Actual)))
+			buf.WriteString(utils.RedBold(fmt.Sprintf("  - %v\n", k)))
+			buf.WriteString(utils.Green(fmt.Sprintf("    + Expected: %v\n", f.Expected)))
+			buf.WriteString(utils.Red(fmt.Sprintf("    - Actual:   %v\n", f.Actual)))
 		}
 	}
 

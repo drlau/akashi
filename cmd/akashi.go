@@ -45,7 +45,7 @@ func NewCommand() *cobra.Command {
 
 	cmd.SetVersionTemplate(version)
 
-	cmd.Flags().StringVarP(&file, "file", "f", "", "read terraform json from file")
+	cmd.Flags().StringVarP(&file, "file", "f", "", "read plan output from file")
 	cmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "compare only, and error if there is a failing rule")
 	cmd.Flags().BoolVar(&failedOnly, "failed-only", false, "only output failing lines")
 	cmd.Flags().BoolVarP(&strict, "strict", "s", false, "require all resources to match a comparer")
