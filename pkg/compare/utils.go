@@ -2,6 +2,7 @@ package compare
 
 import (
 	"fmt"
+
 	"github.com/drlau/akashi/pkg/resource"
 	"github.com/drlau/akashi/pkg/ruleset"
 )

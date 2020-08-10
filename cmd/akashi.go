@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,6 +12,7 @@ import (
 	"github.com/drlau/akashi/pkg/compare"
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/ruleset"
+	"github.com/drlau/akashi/pkg/utils"
 )
 
 const (
@@ -20,24 +20,49 @@ const (
 	destroyKey = "destroy"
 )
 
+// TODO: set this dynamically
+const version = "0.0.1"
+
 var (
-	file  string
-	quiet bool
-	json  bool
+	file          string
+	versionOutput string
+	quiet         bool
+	json          bool
+	failedOnly    bool
+	strict        bool
+	noColor       bool
+	errorOnFail   bool
 )
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "akashi <path to ruleset>",
 		Short: "Akashi / 証",
-		Long:  "Validate your terraform plan changes against a customizable ruleset",
+		Long:  `Validate "terraform plan" changes against a customizable ruleset`,
 		Args:  cobra.ExactArgs(1),
 		RunE:  run,
 	}
 
+	cmd.SetVersionTemplate(version)
+
 	cmd.Flags().StringVarP(&file, "file", "f", "", "read terraform json from file")
-	cmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "don't output a diff")
+	cmd.Flags().BoolVarP(&quiet, "quiet", "q", false, "compare only, and error if there is a failing rule")
+	cmd.Flags().BoolVar(&failedOnly, "failed-only", false, "only output failing lines")
+	cmd.Flags().BoolVarP(&strict, "strict", "s", false, "require all resources to match a comparer")
+	cmd.Flags().BoolVar(&noColor, "no-color", false, "disable color output")
+	cmd.Flags().BoolVarP(&errorOnFail, "error-on-fail", "e", false, "for non-quiet runs, make akashi return exit code 1 on fails")
 	cmd.Flags().BoolVarP(&json, "json", "j", false, "read the contents as the output from 'terraform state show -json'")
+	// TODO
+	// cmd.Flags().BoolVarP(&verbose, "verbose", "V", false, "enable verbose output")
+
+	versionCmd := &cobra.Command{
+		Use:    "version",
+		Hidden: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(version)
+		},
+	}
+	cmd.AddCommand(versionCmd)
 
 	return cmd
 }
@@ -88,14 +113,14 @@ func run(_ *cobra.Command, args []string) error {
 
 	if quiet {
 		// TODO: better way to do this?
-		os.Exit(runCompare(in, comparers, false))
+		os.Exit(runCompare(in, comparers))
 	}
 
-	runDiff(in, comparers, false)
+	os.Exit(runDiff(in, comparers))
 	return nil
 }
 
-func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer, strict bool) int {
+func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
 
@@ -116,26 +141,33 @@ func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer,
 	return 0
 }
 
-func runDiff(rc []plan.ResourceChange, comparers map[string]compare.Comparer, strict bool) {
+func runDiff(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
+	exitCode := 0
+	out := utils.NewOutput(noColor)
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
 
-	// TODO: handle output better
-	var buf bytes.Buffer
 	for _, r := range rc {
+		pass := true
 		if r.IsCreate() && hasCreate {
-			result := createComparer.Diff(r)
-			if result != "" {
-				buf.WriteString(result)
+			pass = createComparer.Diff(out, r)
+			if pass && !failedOnly {
+				fmt.Fprintln(out, utils.Green(fmt.Sprintf("✓ %s", r.GetAddress())))
 			}
 		} else if r.IsDelete() && hasDestroy {
-			result := destroyComparer.Diff(r)
-			if result != "" {
-				buf.WriteString(result)
+			pass = destroyComparer.Diff(out, r)
+			if pass && !failedOnly {
+				fmt.Fprintln(out, utils.Green(fmt.Sprintf("✓ %s", r.GetAddress())))
 			}
 		} else if strict {
-			buf.WriteString(fmt.Sprintf("no comparer for %s\n", r.GetAddress()))
+			pass = false
+			fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("? %s (no matching comparer)", r.GetAddress())))
+		}
+
+		if !pass && errorOnFail {
+			exitCode = 1
 		}
 	}
-	fmt.Println(buf.String())
+
+	return exitCode
 }

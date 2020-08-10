@@ -2,10 +2,12 @@ package compare
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/resource"
 	"github.com/drlau/akashi/pkg/ruleset"
+	"github.com/drlau/akashi/pkg/utils"
 )
 
 // TODO: Create and destroy are nearly identical
@@ -64,7 +66,7 @@ func (c *CreateComparer) Compare(r plan.ResourceChange) bool {
 	return !c.Strict
 }
 
-func (c *CreateComparer) Diff(r plan.ResourceChange) string {
+func (c *CreateComparer) Diff(out io.Writer, r plan.ResourceChange) bool {
 	nameType := constructNameTypeKey(r)
 	changes := resource.ResourceValues{
 		Values:   r.GetAfter(),
@@ -78,13 +80,23 @@ func (c *CreateComparer) Diff(r plan.ResourceChange) string {
 		ro = rs
 	} else if rs, ok := c.TypeResources[r.GetType()]; ok {
 		ro = rs
-	} else if c.Strict {
-		return fmt.Sprintf("%s had no matching rule\n", r.GetAddress())
+	} else {
+		if c.Strict {
+			fmt.Fprintln(out, utils.Red(fmt.Sprintf("× %s (no matching rule)", r.GetAddress())))
+			return false
+		}
+
+		fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("? %s (no matching rule)", r.GetAddress())))
+		return true
 	}
 
 	diff := ro.diff(changes)
 	if diff != "" {
-		return fmt.Sprintf("%s\n%s\n", r.GetAddress(), diff)
+		fmt.Fprintln(out, utils.Red(fmt.Sprintf("× %s", r.GetAddress())))
+		fmt.Fprintln(out, diff)
+
+		return false
 	}
-	return diff
+
+	return true
 }

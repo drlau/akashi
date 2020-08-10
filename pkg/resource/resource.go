@@ -6,12 +6,12 @@ import (
 	"reflect"
 
 	"github.com/drlau/akashi/pkg/ruleset"
+	"github.com/drlau/akashi/pkg/utils"
 )
 
 type Resource interface {
 	CompareResult(map[string]interface{}) *CompareResult
 	Compare(ResourceValues, CompareOptions) bool
-	// TODO: diff should take in io.writer
 	Diff(ResourceValues, CompareOptions) string
 }
 
@@ -118,34 +118,35 @@ func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
 	cmp := r.CompareResult(values)
 
 	if opts.EnforceAll && len(cmp.MissingEnforced) > 0 {
-		buf.WriteString("Missing enforced arguments:\n")
+		buf.WriteString(utils.RedBold("Missing enforced arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
-			buf.WriteString(fmt.Sprintf("  - %s\n", arg))
+			buf.WriteString(utils.Red(fmt.Sprintf("  - %s\n", arg)))
 		}
 	}
 	if !opts.IgnoreExtraArgs && len(cmp.Extra) != 0 {
-		buf.WriteString("Extra arguments:\n")
+		buf.WriteString(utils.YellowBold("Extra arguments:\n"))
 		for arg, _ := range cmp.Extra {
-			buf.WriteString(fmt.Sprintf("  - %s\n", arg))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
 		}
 	}
 	if opts.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
-		buf.WriteString("Missing enforced and ignored arguments:\n")
+		buf.WriteString(utils.YellowBold("Missing enforced and ignored arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
-			buf.WriteString(fmt.Sprintf("  - %s\n", arg))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
 		}
 		for arg, _ := range cmp.MissingIgnored {
-			buf.WriteString(fmt.Sprintf("  - %s\n", arg))
+			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %s\n", arg)))
 		}
 	}
 
 	if len(cmp.Failed) > 0 {
-		buf.WriteString("Failed arguments:\n")
+		buf.WriteString(utils.RedBold("Failed arguments:\n"))
 		for k, v := range cmp.Failed {
 			f := v.(FailedArg)
-			buf.WriteString(fmt.Sprintf("  - %s\n", k))
-			buf.WriteString(fmt.Sprintf("    + Expected: %s\n", f.Expected))
-			buf.WriteString(fmt.Sprintf("    - Actual:   %s\n", f.Actual))
+
+			buf.WriteString(utils.RedBold(fmt.Sprintf("  - %s\n", k)))
+			buf.WriteString(utils.Green(fmt.Sprintf("    + Expected: %s\n", f.Expected)))
+			buf.WriteString(utils.Red(fmt.Sprintf("    - Actual:   %s\n", f.Actual)))
 		}
 	}
 
