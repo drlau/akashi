@@ -632,7 +632,7 @@ func TestResourceDiff(t *testing.T) {
 			got := tc.resource.Diff(tc.values, tc.opts)
 			for _, s := range tc.expected {
 				if !strings.Contains(got, s) {
-					t.Errorf("Result string did not contain %v", got)
+					t.Errorf("Result string did not contain %v", s)
 				}
 			}
 		})

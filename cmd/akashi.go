@@ -112,11 +112,11 @@ func run(_ *cobra.Command, args []string) error {
 	}
 
 	if quiet {
-		// TODO: better way to do this?
 		os.Exit(runCompare(in, comparers))
 	}
+	out := utils.NewOutput(noColor)
 
-	os.Exit(runDiff(in, comparers))
+	os.Exit(runDiff(out, in, comparers))
 	return nil
 }
 
@@ -141,9 +141,8 @@ func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer)
 	return 0
 }
 
-func runDiff(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
+func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
 	exitCode := 0
-	out := utils.NewOutput(noColor)
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
 
