@@ -6,5 +6,14 @@ type ResourceValues struct {
 }
 
 func (rv ResourceValues) GetCombined() map[string]interface{} {
-	return setUnion(rv.Values, rv.Computed)
+	combined := rv.Values
+	if combined == nil {
+		combined = make(map[string]interface{})
+	}
+
+	for k, v := range rv.Computed {
+		combined[k] = v
+	}
+
+	return combined
 }

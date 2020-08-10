@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/drlau/akashi/pkg/compare"
-	"github.com/drlau/akashi/pkg/plan"
 	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
+	"github.com/drlau/akashi/pkg/plan"
 	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
 )
 

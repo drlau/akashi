@@ -1,9 +1,9 @@
 package resource
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/drlau/akashi/pkg/ruleset"
 	"github.com/drlau/akashi/pkg/utils"
@@ -92,7 +92,7 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
 	values := rv.Values
 	if !opts.IgnoreComputed {
-		values = setUnion(values, rv.Computed)
+		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
 
@@ -110,10 +110,10 @@ func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
 }
 
 func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	values := rv.Values
 	if !opts.IgnoreComputed {
-		values = setUnion(values, rv.Computed)
+		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
 
@@ -164,16 +164,4 @@ func setDifference(a, b map[string]interface{}) map[string]interface{} {
 	}
 
 	return result
-}
-
-// union returns elements of A and B
-// this is used only to merge After and AfterUnknown
-// which is guaranteed to have a null set intersection
-// so we don't need to handle the collision case
-func setUnion(a, b map[string]interface{}) map[string]interface{} {
-	for k, v := range b {
-		a[k] = v
-	}
-
-	return a
 }

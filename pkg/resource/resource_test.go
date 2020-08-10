@@ -1,8 +1,10 @@
 package resource
 
 import (
-	"github.com/google/go-cmp/cmp"
+	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestResourceCompareResult(t *testing.T) {
@@ -405,6 +407,233 @@ func TestResourceCompare(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if got := tc.resource.Compare(tc.values, tc.opts); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
+			}
+		})
+	}
+}
+
+// TODO: should verify order of expected strings
+func TestResourceDiff(t *testing.T) {
+	cases := map[string]struct {
+		resource Resource
+		opts     CompareOptions
+		values   ResourceValues
+		expected []string
+	}{
+		"enforced value matches": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{""},
+		},
+		"enforced value does not match": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key": "value2",
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{
+				"Failed arguments:",
+				"- key",
+				"+ Expected: value2",
+				"- Actual:   value",
+			},
+		},
+		"extra value that is ignored": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key": "value",
+				},
+				IgnoredArgs: map[string]interface{}{
+					"ignored": true,
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":     "value",
+					"ignored": "ignored",
+				},
+			},
+			expected: []string{""},
+		},
+		"extra value": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":     "value",
+					"ignored": "ignored",
+				},
+			},
+			expected: []string{
+				"Extra arguments:",
+				"ignored",
+			},
+		},
+		"extra value with IgnoreExtraArgs enabled": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			opts: CompareOptions{
+				IgnoreExtraArgs: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":     "value",
+					"ignored": "ignored",
+				},
+			},
+			expected: []string{""},
+		},
+		"missing enforced value": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key":    "value",
+					"second": "value",
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{""},
+		},
+		"missing enforced value with EnforceAll": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"key":    "value",
+					"second": "value",
+				},
+			},
+			opts: CompareOptions{
+				EnforceAll: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{
+				"Missing enforced arguments:",
+				"second",
+			},
+		},
+		"ignored arg match only": {
+			resource: &resource{
+				IgnoredArgs: map[string]interface{}{
+					"key": true,
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{""},
+		},
+		"ignored arg with extra value": {
+			resource: &resource{
+				IgnoredArgs: map[string]interface{}{
+					"key": true,
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":    "value",
+					"second": "value",
+				},
+			},
+			expected: []string{
+				"Extra arguments:",
+				"second",
+			},
+		},
+		"ignored arg with extra value and ignoreExtraArgs enabled": {
+			resource: &resource{
+				IgnoredArgs: map[string]interface{}{
+					"key": true,
+				},
+			},
+			opts: CompareOptions{
+				IgnoreExtraArgs: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":    "value",
+					"second": "value",
+				},
+			},
+			expected: []string{""},
+		},
+		"values is missing a key from ignored or enforced": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"enforced": "value",
+				},
+				IgnoredArgs: map[string]interface{}{
+					"key":    true,
+					"second": true,
+				},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":      "value",
+					"enforced": "value",
+				},
+			},
+			expected: []string{""},
+		},
+		"values is missing a key from ignored or enforced and requireAll is enabled": {
+			resource: &resource{
+				EnforcedValues: map[string]interface{}{
+					"enforced": "value",
+				},
+				IgnoredArgs: map[string]interface{}{
+					"key":    true,
+					"second": true,
+				},
+			},
+			opts: CompareOptions{
+				RequireAll: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key":      "value",
+					"enforced": "value",
+				},
+			},
+			expected: []string{
+				"Missing enforced and ignored arguments:",
+				"second",
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got := tc.resource.Diff(tc.values, tc.opts)
+			for _, s := range tc.expected {
+				if !strings.Contains(got, s) {
+					t.Errorf("Result string did not contain %v", got)
+				}
 			}
 		})
 	}
