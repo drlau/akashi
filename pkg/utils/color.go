@@ -9,12 +9,10 @@ import (
 )
 
 var (
-	Red        = ansi.ColorFunc("red")
-	RedBold    = ansi.ColorFunc("red+b")
-	Yellow     = ansi.ColorFunc("yellow")
-	YellowBold = ansi.ColorFunc("yellow+b")
-	Green      = ansi.ColorFunc("green")
-	Bold       = ansi.ColorFunc("default+b")
+	Red    = ansi.ColorFunc("red")
+	Yellow = ansi.ColorFunc("yellow")
+	Green  = ansi.ColorFunc("green")
+	Bold   = ansi.ColorFunc("default+b")
 )
 
 func NewOutput(noColor bool) io.Writer {

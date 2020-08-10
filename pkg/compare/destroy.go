@@ -2,7 +2,6 @@ package compare
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/resource"
@@ -63,7 +62,7 @@ func (c *DestroyComparer) Compare(r plan.ResourceChange) bool {
 	return !c.Strict
 }
 
-func (c *DestroyComparer) Diff(out io.Writer, r plan.ResourceChange) bool {
+func (c *DestroyComparer) Diff(r plan.ResourceChange) (string, bool) {
 	nameType := constructNameTypeKey(r)
 	changes := resource.ResourceValues{
 		Values: r.GetBefore(),
@@ -78,21 +77,16 @@ func (c *DestroyComparer) Diff(out io.Writer, r plan.ResourceChange) bool {
 		ro = rs
 	} else {
 		if c.Strict {
-			fmt.Fprintln(out, utils.Red(fmt.Sprintf("× %s (no matching rule)", r.GetAddress())))
-			return false
+			return fmt.Sprintf("%s %s (no matching rule)", utils.Red("×"), r.GetAddress()), false
 		}
 
-		fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("? %s (no matching rule)", r.GetAddress())))
-		return true
+		return fmt.Sprintf("%s %s (no matching rule)", utils.Yellow("!"), r.GetAddress()), true
 	}
 
 	diff := ro.diff(changes)
 	if diff != "" {
-		fmt.Fprintln(out, utils.Red(fmt.Sprintf("× %s", r.GetAddress())))
-		fmt.Fprintln(out, diff)
-
-		return false
+		return fmt.Sprintf("%s %s\n%s", utils.Red("×"), utils.Red(r.GetAddress()), diff), false
 	}
 
-	return true
+	return fmt.Sprintf("%s %s", utils.Green("✓"), r.GetAddress()), true
 }

@@ -147,23 +147,34 @@ func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compa
 	destroyComparer, hasDestroy := comparers[destroyKey]
 
 	for _, r := range rc {
+		diff := ""
 		pass := true
 		if r.IsCreate() && hasCreate {
-			pass = createComparer.Diff(out, r)
-			if pass && !failedOnly {
-				fmt.Fprintln(out, utils.Green(fmt.Sprintf("✓ %s", r.GetAddress())))
-			}
+			diff, pass = createComparer.Diff(r)
 		} else if r.IsDelete() && hasDestroy {
-			pass = destroyComparer.Diff(out, r)
-			if pass && !failedOnly {
-				fmt.Fprintln(out, utils.Green(fmt.Sprintf("✓ %s", r.GetAddress())))
+			diff, pass = destroyComparer.Diff(r)
+		} else {
+			if !strict {
+				continue
 			}
-		} else if strict {
-			pass = false
-			fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("? %s (no matching comparer)", r.GetAddress())))
+
+			if errorOnFail {
+				exitCode = 1
+			}
+			fmt.Fprintln(out, fmt.Sprintf("%s %s (no matching comparer)", utils.Yellow("?"), r.GetAddress()))
+			continue
+		}
+		if pass {
+			if failedOnly {
+				continue
+			}
+
+			fmt.Fprintln(out, diff)
+			continue
 		}
 
-		if !pass && errorOnFail {
+		fmt.Fprintln(out, diff)
+		if errorOnFail {
 			exitCode = 1
 		}
 	}

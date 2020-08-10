@@ -1,7 +1,6 @@
 package compare
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 
@@ -144,7 +143,7 @@ func TestDestroyDiff(t *testing.T) {
 		comparer       *DestroyComparer
 		resourceChange plan.ResourceChange
 		expected       bool
-		expectedOutput string
+		expectedOutput []string
 	}{
 		"matching nametype resource": {
 			comparer: &DestroyComparer{
@@ -162,7 +161,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       true,
-			expectedOutput: "",
+			expectedOutput: []string{""},
 		},
 		"matching nametype resource returning false": {
 			comparer: &DestroyComparer{
@@ -180,7 +179,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       false,
-			expectedOutput: "× address",
+			expectedOutput: []string{"×", "address"},
 		},
 		"matching name resource": {
 			comparer: &DestroyComparer{
@@ -198,7 +197,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       true,
-			expectedOutput: "",
+			expectedOutput: []string{""},
 		},
 		"matching type resource": {
 			comparer: &DestroyComparer{
@@ -216,7 +215,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       true,
-			expectedOutput: "",
+			expectedOutput: []string{""},
 		},
 		"prioritizes matching nametype resource": {
 			comparer: &DestroyComparer{
@@ -248,7 +247,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       true,
-			expectedOutput: "",
+			expectedOutput: []string{""},
 		},
 		"no matching resource": {
 			comparer: &DestroyComparer{},
@@ -258,7 +257,7 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       true,
-			expectedOutput: "? address (no matching rule)",
+			expectedOutput: []string{"!", "address (no matching rule)"},
 		},
 		"no matching resource with strict enabled": {
 			comparer: &DestroyComparer{
@@ -270,19 +269,20 @@ func TestDestroyDiff(t *testing.T) {
 				TypeReturns:    "type",
 			},
 			expected:       false,
-			expectedOutput: "× address (no matching rule)",
+			expectedOutput: []string{"×", "address (no matching rule)"},
 		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			var output bytes.Buffer
-			got := tc.comparer.Diff(&output, tc.resourceChange)
+			output, got := tc.comparer.Diff(tc.resourceChange)
 			if got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
-			if !strings.Contains(output.String(), tc.expectedOutput) {
-				t.Errorf("Output %s did not contain expected string %s", output.String(), tc.expectedOutput)
+			for _, o := range tc.expectedOutput {
+				if !strings.Contains(output, o) {
+					t.Errorf("Output %s did not contain expected string %s", output, o)
+				}
 			}
 		})
 	}

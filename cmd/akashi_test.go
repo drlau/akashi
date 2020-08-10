@@ -130,7 +130,7 @@ func TestRunDiff(t *testing.T) {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: false,
-					DiffOutput:  []byte("comparer fail"),
+					DiffOutput:  "comparer fail",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -148,6 +148,7 @@ func TestRunDiff(t *testing.T) {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: true,
+					DiffOutput:  "comparer ok",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -159,7 +160,7 @@ func TestRunDiff(t *testing.T) {
 				},
 			},
 			expected:       0,
-			expectedOutput: []string{"✓ address"},
+			expectedOutput: []string{"comparer ok"},
 		},
 		"no matching comparer": {
 			comparers: map[string]compare.Comparer{
@@ -181,6 +182,7 @@ func TestRunDiff(t *testing.T) {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: false,
+					DiffOutput:  "comparer fail",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -194,12 +196,13 @@ func TestRunDiff(t *testing.T) {
 				strict = true
 			},
 			expected:       0,
-			expectedOutput: []string{"? address (no matching comparer)"},
+			expectedOutput: []string{"?", "address (no matching comparer)"},
 		},
 		"create returns true with multiple resources": {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: true,
+					DiffOutput:  "comparer ok",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -217,16 +220,17 @@ func TestRunDiff(t *testing.T) {
 				},
 			},
 			expected:       0,
-			expectedOutput: []string{"✓ address1", "✓ address2"},
+			expectedOutput: []string{"comparer ok\ncomparer ok"},
 		},
 		"fails if there is at least 1 failure": {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: false,
-					DiffOutput:  []byte("comparer fail"),
+					DiffOutput:  "comparer fail",
 				},
 				destroyKey: &comparefakes.FakeComparer{
 					DiffReturns: true,
+					DiffOutput:  "comparer ok",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -244,16 +248,17 @@ func TestRunDiff(t *testing.T) {
 				},
 			},
 			expected:       0,
-			expectedOutput: []string{"comparer fail", "✓ address2"},
+			expectedOutput: []string{"comparer fail", "comparer ok"},
 		},
 		"returns 1 if there is at least 1 failure and errorOnFail is set": {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: false,
-					DiffOutput:  []byte("comparer fail"),
+					DiffOutput:  "comparer fail",
 				},
 				destroyKey: &comparefakes.FakeComparer{
 					DiffReturns: true,
+					DiffOutput:  "comparer ok",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
@@ -274,16 +279,17 @@ func TestRunDiff(t *testing.T) {
 				errorOnFail = true
 			},
 			expected:       1,
-			expectedOutput: []string{"comparer fail", "✓ address2"},
+			expectedOutput: []string{"comparer fail", "comparer ok"},
 		},
 		"only outputs failed with failedOnly": {
 			comparers: map[string]compare.Comparer{
 				createKey: &comparefakes.FakeComparer{
 					DiffReturns: false,
-					DiffOutput:  []byte("comparer fail"),
+					DiffOutput:  "comparer fail",
 				},
 				destroyKey: &comparefakes.FakeComparer{
 					DiffReturns: true,
+					DiffOutput:  "comparer ok",
 				},
 			},
 			resourceChange: []plan.ResourceChange{
