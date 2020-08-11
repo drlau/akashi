@@ -21,7 +21,7 @@ const (
 )
 
 // TODO: set this dynamically
-const version = "0.0.1"
+const version = "0.0.2"
 
 var (
 	file          string

@@ -23,17 +23,17 @@ type CreateDeleteResourceChange struct {
 }
 
 type CompareOptions struct {
-	// If enforceAll is enabled, all EnforcedValues must be present
+	// If enforceAll is enabled, all Enforced must be present
 	EnforceAll *bool `yaml:"enforceAll,omitempty"`
 
-	// If ignoreExtraArgs is enabled, extra args not in Enforced or IgnoredArgs are ignored
+	// If ignoreExtraArgs is enabled, extra args not in Enforced or Ignored are ignored
 	IgnoreExtraArgs *bool `yaml:"ignoreExtraArgs,omitempty"`
 
 	// If ignoreComputed is enabled, args that result in a computed value are ignored
 	// Has no effect on destroyed values
 	IgnoreComputed *bool `yaml:"ignoreComputed,omitempty"`
 
-	// If requireAll is enabled, every key in enforcedValues or IgnoredArgs must be present
+	// If requireAll is enabled, every key in enforced or Ignored must be present
 	RequireAll *bool `yaml:"requireAll,omitempty"`
 }
 
@@ -43,6 +43,6 @@ type ResourceChange struct {
 	// TODO: index
 	// Index interface{} `yaml:"index,omitempty"`
 
-	EnforcedValues map[string]interface{} `yaml:"enforcedValues,omitempty"`
-	IgnoredArgs    []string               `yaml:"ignoredArgs,omitempty"`
+	Enforced map[string]interface{} `yaml:"enforced,omitempty"`
+	Ignored  []string               `yaml:"ignored,omitempty"`
 }

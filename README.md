@@ -111,13 +111,13 @@ createdResources:
 
       # List of arguments to ignore.
       # Default is empty.
-      ignoredArgs:
+      ignored:
         - ignored-arg-1
         - ignored-arg-2
 
       # List of arguments to enforce.
       # Default is empty.
-      enforcedValues:
+      enforced:
         stringEnforced: string
         intEnforced: 1
         boolEnforced: true
@@ -143,6 +143,6 @@ createdResources:
     ignoreExtraArgs: true
   resources:
     - type: google_compute_instance
-      enforcedValues:
+      enforced:
         zone: us-central1-a
 ```

@@ -21,8 +21,8 @@ type resource struct {
 	// TODO support Index
 	// Index interface{}
 
-	EnforcedValues map[string]interface{}
-	IgnoredArgs    map[string]interface{}
+	Enforced map[string]interface{}
+	Ignored  map[string]interface{}
 }
 
 type CompareOptions struct {
@@ -33,35 +33,35 @@ type CompareOptions struct {
 }
 
 func NewResourceFromConfig(c ruleset.ResourceChange) Resource {
-	ignoredArgs := make(map[string]interface{})
+	ignored := make(map[string]interface{})
 
-	for _, i := range c.IgnoredArgs {
-		ignoredArgs[i] = true
+	for _, i := range c.Ignored {
+		ignored[i] = true
 	}
 	return &resource{
-		Name:           c.Name,
-		Type:           c.Type,
-		EnforcedValues: c.EnforcedValues,
-		IgnoredArgs:    ignoredArgs,
+		Name:     c.Name,
+		Type:     c.Type,
+		Enforced: c.Enforced,
+		Ignored:  ignored,
 	}
 }
 
 func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 	enforcedArgs := make(map[string]interface{})
 	failedArgs := make(map[string]interface{})
-	ignoredArgs := make(map[string]interface{})
+	ignored := make(map[string]interface{})
 	extraArgs := make(map[string]interface{})
 
 	// Passed in the plan's values
 	// Iterate over each key/value
 	for k, v := range values {
 		// If the key is ignored, record and continue
-		if _, ok := r.IgnoredArgs[k]; ok {
-			ignoredArgs[k] = true
+		if _, ok := r.Ignored[k]; ok {
+			ignored[k] = true
 			continue
 		}
 		// If the key is enforced...
-		if enforced, ok := r.EnforcedValues[k]; ok {
+		if enforced, ok := r.Enforced[k]; ok {
 			// Verify the value is what is expected
 			if !reflect.DeepEqual(v, enforced) {
 				// Not equal - record as failed
@@ -82,10 +82,10 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 	return &CompareResult{
 		Enforced:        enforcedArgs,
 		Failed:          failedArgs,
-		Ignored:         ignoredArgs,
+		Ignored:         ignored,
 		Extra:           extraArgs,
-		MissingEnforced: setDifference(setDifference(r.EnforcedValues, enforcedArgs), failedArgs),
-		MissingIgnored:  setDifference(setDifference(r.IgnoredArgs, ignoredArgs), failedArgs),
+		MissingEnforced: setDifference(setDifference(r.Enforced, enforcedArgs), failedArgs),
+		MissingIgnored:  setDifference(setDifference(r.Ignored, ignored), failedArgs),
 	}
 }
 

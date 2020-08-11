@@ -15,7 +15,7 @@ func TestResourceCompareResult(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -35,7 +35,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -58,10 +58,10 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
 			},
@@ -84,7 +84,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -107,7 +107,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key":    "value",
 					"second": "value",
 				},
@@ -130,7 +130,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"ignored arg match only": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -150,7 +150,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"ignored arg with extra value": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -173,7 +173,7 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"missing ignored value": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key":    true,
 					"second": true,
 				},
@@ -215,7 +215,7 @@ func TestResourceCompare(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -228,7 +228,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value2",
 				},
 			},
@@ -241,10 +241,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
 			},
@@ -258,7 +258,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -272,7 +272,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value with IgnoreExtraArgs enabled": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -289,7 +289,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key":    "value",
 					"second": "value",
 				},
@@ -303,7 +303,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"missing enforced value with EnforceAll": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key":    "value",
 					"second": "value",
 				},
@@ -320,7 +320,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"ignored arg match only": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -333,7 +333,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"ignored arg with extra value": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -347,7 +347,7 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"ignored arg with extra value and ignoreExtraArgs enabled": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -364,10 +364,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"enforced": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key":    true,
 					"second": true,
 				},
@@ -382,10 +382,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced and requireAll is enabled": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"enforced": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key":    true,
 					"second": true,
 				},
@@ -422,7 +422,7 @@ func TestResourceDiff(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -435,7 +435,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value2",
 				},
 			},
@@ -453,10 +453,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
 			},
@@ -470,7 +470,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -487,7 +487,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value with IgnoreExtraArgs enabled": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key": "value",
 				},
 			},
@@ -504,7 +504,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key":    "value",
 					"second": "value",
 				},
@@ -518,7 +518,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"missing enforced value with EnforceAll": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"key":    "value",
 					"second": "value",
 				},
@@ -538,7 +538,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"ignored arg match only": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -551,7 +551,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"ignored arg with extra value": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -568,7 +568,7 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"ignored arg with extra value and ignoreExtraArgs enabled": {
 			resource: &resource{
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key": true,
 				},
 			},
@@ -585,10 +585,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"enforced": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key":    true,
 					"second": true,
 				},
@@ -603,10 +603,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced and requireAll is enabled": {
 			resource: &resource{
-				EnforcedValues: map[string]interface{}{
+				Enforced: map[string]interface{}{
 					"enforced": "value",
 				},
-				IgnoredArgs: map[string]interface{}{
+				Ignored: map[string]interface{}{
 					"key":    true,
 					"second": true,
 				},
