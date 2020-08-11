@@ -85,7 +85,13 @@ createdResources:
 
     # Set to true if you want every enforcedValue and ignoredArg to be present in a resource's plan.
     # If set to true, if any enforcedValue or ignoredArg is missing, it will count as a failure.
+    # Default is false.
     requireAll: true
+
+    # Set to true if you want to automatically fail before comparison
+    # if a matching resource is found.
+    # Default is false.
+    autoFail: true
 
   # List of rules.
   resources:
@@ -108,6 +114,7 @@ createdResources:
       ignoreExtraArgs: true
       ignoreComputed: true
       requireAll: true
+      autoFail: true
 
       # List of arguments to ignore.
       # Default is empty.

@@ -31,6 +31,7 @@ func newResourceWithOpts(resourceConfig ruleset.CreateDeleteResourceChange, defa
 			IgnoreExtraArgs: boolFromBoolPointer(resourceConfig.CompareOptions.IgnoreExtraArgs, defaultOptions.IgnoreExtraArgs),
 			IgnoreComputed:  boolFromBoolPointer(resourceConfig.CompareOptions.IgnoreComputed, defaultOptions.IgnoreComputed),
 			RequireAll:      boolFromBoolPointer(resourceConfig.CompareOptions.RequireAll, defaultOptions.RequireAll),
+			AutoFail:        boolFromBoolPointer(resourceConfig.CompareOptions.AutoFail, defaultOptions.AutoFail),
 		},
 	}
 }
@@ -49,6 +50,7 @@ func makeDefaultCompareOptions(config *ruleset.CompareOptions) resource.CompareO
 		IgnoreExtraArgs: boolFromBoolPointer(config.IgnoreExtraArgs, false),
 		IgnoreComputed:  boolFromBoolPointer(config.IgnoreComputed, false),
 		RequireAll:      boolFromBoolPointer(config.RequireAll, false),
+		AutoFail:        boolFromBoolPointer(config.AutoFail, false),
 	}
 }
 

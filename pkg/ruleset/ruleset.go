@@ -35,6 +35,9 @@ type CompareOptions struct {
 
 	// If requireAll is enabled, every key in enforced or Ignored must be present
 	RequireAll *bool `yaml:"requireAll,omitempty"`
+
+	// If autoFail is enabled, automatically fails before comparison if a matching resource is found
+	AutoFail *bool `yaml:"autoFail,omitempty"`
 }
 
 type ResourceChange struct {

@@ -25,11 +25,13 @@ type resource struct {
 	Ignored  map[string]interface{}
 }
 
+// TODO: consider moving this to functions
 type CompareOptions struct {
 	EnforceAll      bool
 	IgnoreExtraArgs bool
 	IgnoreComputed  bool
 	RequireAll      bool
+	AutoFail        bool
 }
 
 func NewResourceFromConfig(c ruleset.ResourceChange) Resource {
@@ -90,6 +92,9 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 }
 
 func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
+	if opts.AutoFail {
+		return false
+	}
 	values := rv.Values
 	if !opts.IgnoreComputed {
 		values = rv.GetCombined()
@@ -110,6 +115,9 @@ func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
 }
 
 func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
+	if opts.AutoFail {
+		return utils.Red("AutoFail set to true")
+	}
 	var buf strings.Builder
 	values := rv.Values
 	if !opts.IgnoreComputed {
