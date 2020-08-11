@@ -401,6 +401,34 @@ func TestResourceCompare(t *testing.T) {
 			},
 			expected: false,
 		},
+		"autofail makes result false even if it passes match": {
+			resource: &resource{
+				Enforced: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			opts: CompareOptions{
+				AutoFail: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: false,
+		},
+		"autofail with no enforced or ignored": {
+			resource: &resource{},
+			opts: CompareOptions{
+				AutoFail: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: false,
+		},
 	}
 
 	for name, tc := range cases {
@@ -624,6 +652,34 @@ func TestResourceDiff(t *testing.T) {
 				"Missing enforced and ignored arguments:",
 				"second",
 			},
+		},
+		"autofail makes result false even if it passes match": {
+			resource: &resource{
+				Enforced: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			opts: CompareOptions{
+				AutoFail: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{"AutoFail set to true"},
+		},
+		"autofail with no enforced or ignored": {
+			resource: &resource{},
+			opts: CompareOptions{
+				AutoFail: true,
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{"AutoFail set to true"},
 		},
 	}
 
