@@ -9,6 +9,11 @@ import (
 	"github.com/drlau/akashi/pkg/utils"
 )
 
+var (
+	emptyMap = map[interface{}]interface{}{}
+	emptyStringMap = map[string]interface{}{}
+)
+
 type Resource interface {
 	CompareResult(map[string]interface{}) *CompareResult
 	Compare(ResourceValues, CompareOptions) bool
@@ -65,7 +70,9 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 		// If the key is enforced...
 		if enforced, ok := r.Enforced[k]; ok {
 			// Verify the value is what is expected
-			if !reflect.DeepEqual(v, enforced) {
+			// Hack to compare empty maps
+			// YAML parses "key: {}" as a map[interface{}]interface{} which is different from map[string]interface{}
+			if !reflect.DeepEqual(v, enforced) && !(reflect.DeepEqual(enforced, emptyMap) && reflect.DeepEqual(v, emptyStringMap)) {
 				// Not equal - record as failed
 				failedArgs[k] = FailedArg{
 					Expected: enforced,
