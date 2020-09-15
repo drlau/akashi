@@ -188,7 +188,11 @@ func setDifference(a, b map[string]interface{}) map[string]interface{} {
 func convertMapKeysToString(in map[interface{}]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range in {
-		result[fmt.Sprintf("%v", k)] = v
+		if mapV, ok := v.(map[interface{}]interface{}); ok {
+			result[fmt.Sprintf("%v", k)] = convertMapKeysToString(mapV)
+		} else {
+			result[fmt.Sprintf("%v", k)] = v
+		}
 	}
 
 	return result
