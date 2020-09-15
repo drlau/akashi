@@ -69,10 +69,13 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 		}
 		// If the key is enforced...
 		if enforced, ok := r.Enforced[k]; ok {
-			// Verify the value is what is expected
-			// Hack to compare empty maps
 			// YAML parses "key: {}" as a map[interface{}]interface{} which is different from map[string]interface{}
-			if !reflect.DeepEqual(v, enforced) && !(reflect.DeepEqual(enforced, emptyMap) && reflect.DeepEqual(v, emptyStringMap)) {
+			if mapEnforced, ok := enforced.(map[interface{}]interface{}); ok {
+				enforced = convertMapKeysToString(mapEnforced)
+			}
+
+			// Verify the value is what is expected
+			if !reflect.DeepEqual(v, enforced) {
 				// Not equal - record as failed
 				failedArgs[k] = FailedArg{
 					Expected: enforced,
@@ -176,6 +179,16 @@ func setDifference(a, b map[string]interface{}) map[string]interface{} {
 		if _, ok := b[k]; !ok {
 			result[k] = v
 		}
+	}
+
+	return result
+}
+
+// convertMapKeysToString converts map[interface{}]interface{} to map[string]interface{}
+func convertMapKeysToString(in map[interface{}]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range in {
+		result[fmt.Sprintf("%v", k)] = v
 	}
 
 	return result
