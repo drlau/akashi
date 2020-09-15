@@ -7,7 +7,7 @@ Still a WIP project. Supports `terraform` v0.12 currently.
 - [x] Created and destroyed resources
 - [x] JSON Output
 - [x] stdout output
-- [ ] Map / Array rules
+- [x] Map / Array rules
 - [ ] Updated resources
 - [ ] Index matching
 - [ ] Module matching
