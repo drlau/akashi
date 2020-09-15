@@ -45,6 +45,9 @@ func (r resourceWithOpts) diff(rv resource.ResourceValues) string {
 }
 
 func makeDefaultCompareOptions(config *ruleset.CompareOptions) resource.CompareOptions {
+	if config == nil {
+		return resource.CompareOptions{}
+	}
 	return resource.CompareOptions{
 		EnforceAll:      boolFromBoolPointer(config.EnforceAll, false),
 		IgnoreExtraArgs: boolFromBoolPointer(config.IgnoreExtraArgs, false),
