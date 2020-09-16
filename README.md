@@ -13,6 +13,7 @@ Still a WIP project. Supports `terraform` v0.12 currently.
 - [ ] Module matching
 - [ ] Multiple rule matching
 - [ ] Other validations(regex, int in range, etc)
+- [ ] Combining multiple rulesets
 - [ ] Customizable output
 
 ## Installation
