@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/drlau/akashi/pkg/ruleset"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -15,8 +16,10 @@ func TestResourceCompareResult(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: map[string]interface{}{
@@ -24,7 +27,9 @@ func TestResourceCompareResult(t *testing.T) {
 			},
 			expected: &CompareResult{
 				Enforced: map[string]interface{}{
-					"key": "value",
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Failed:          map[string]interface{}{},
 				Ignored:         map[string]interface{}{},
@@ -35,8 +40,10 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: map[string]interface{}{
@@ -58,8 +65,10 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"ignored": true,
@@ -71,7 +80,9 @@ func TestResourceCompareResult(t *testing.T) {
 			},
 			expected: &CompareResult{
 				Enforced: map[string]interface{}{
-					"key": "value",
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Failed: map[string]interface{}{},
 				Ignored: map[string]interface{}{
@@ -84,8 +95,10 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: map[string]interface{}{
@@ -94,7 +107,9 @@ func TestResourceCompareResult(t *testing.T) {
 			},
 			expected: &CompareResult{
 				Enforced: map[string]interface{}{
-					"key": "value",
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Failed:  map[string]interface{}{},
 				Ignored: map[string]interface{}{},
@@ -107,9 +122,13 @@ func TestResourceCompareResult(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key":    "value",
-					"second": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: map[string]interface{}{
@@ -117,13 +136,17 @@ func TestResourceCompareResult(t *testing.T) {
 			},
 			expected: &CompareResult{
 				Enforced: map[string]interface{}{
-					"key": "value",
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Failed:  map[string]interface{}{},
 				Ignored: map[string]interface{}{},
 				Extra:   map[string]interface{}{},
 				MissingEnforced: map[string]interface{}{
-					"second": "value",
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				MissingIgnored: map[string]interface{}{},
 			},
@@ -215,8 +238,10 @@ func TestResourceCompare(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -228,8 +253,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value2",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value2",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -241,8 +268,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"ignored": true,
@@ -258,8 +287,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -272,8 +303,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"extra value with IgnoreExtraArgs enabled": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{
@@ -289,9 +322,13 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key":    "value",
-					"second": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -303,9 +340,13 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"missing enforced value with EnforceAll": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key":    "value",
-					"second": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{
@@ -364,8 +405,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"enforced": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"enforced": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"key":    true,
@@ -382,8 +425,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced and requireAll is enabled": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"enforced": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"enforced": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"key":    true,
@@ -403,8 +448,10 @@ func TestResourceCompare(t *testing.T) {
 		},
 		"autofail makes result false even if it passes match": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"enforced": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{
@@ -450,8 +497,10 @@ func TestResourceDiff(t *testing.T) {
 	}{
 		"enforced value matches": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -463,8 +512,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"enforced value does not match": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value2",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value2",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -481,8 +532,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value that is ignored": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"ignored": true,
@@ -498,8 +551,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -515,8 +570,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"extra value with IgnoreExtraArgs enabled": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{
@@ -532,9 +589,13 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"missing enforced value": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key":    "value",
-					"second": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			values: ResourceValues{
@@ -546,9 +607,13 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"missing enforced value with EnforceAll": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key":    "value",
-					"second": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
+					"second": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{
@@ -613,8 +678,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"enforced": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"enforced": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"key":    true,
@@ -631,8 +698,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"values is missing a key from ignored or enforced and requireAll is enabled": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"enforced": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"enforced": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 				Ignored: map[string]interface{}{
 					"key":    true,
@@ -655,8 +724,10 @@ func TestResourceDiff(t *testing.T) {
 		},
 		"autofail makes result false even if it passes match": {
 			resource: &resource{
-				Enforced: map[string]interface{}{
-					"key": "value",
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": ruleset.EnforceChange{
+						Value: "value",
+					},
 				},
 			},
 			opts: CompareOptions{

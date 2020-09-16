@@ -23,4 +23,5 @@ type CompareResult struct {
 type FailedArg struct {
 	Expected interface{}
 	Actual   interface{}
+	MatchAny bool
 }
