@@ -46,6 +46,11 @@ type ResourceChange struct {
 	// TODO: index
 	// Index interface{} `yaml:"index,omitempty"`
 
-	Enforced map[string]interface{} `yaml:"enforced,omitempty"`
-	Ignored  []string               `yaml:"ignored,omitempty"`
+	Enforced map[string]EnforceChange `yaml:"enforced,omitempty"`
+	Ignored  []string                 `yaml:"ignored,omitempty"`
+}
+
+type EnforceChange struct {
+	Value    interface{}   `yaml:"value,omitempty"`
+	MatchAny []interface{} `yaml:"matchAny,omitempty"`
 }

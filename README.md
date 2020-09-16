@@ -126,14 +126,23 @@ createdResources:
       # List of arguments to enforce.
       # Default is empty.
       enforced:
-        stringEnforced: string
-        intEnforced: 1
-        boolEnforced: true
+        stringEnforced:
+          value: string
+        intEnforced:
+          value: 1
+        boolEnforced:
+          value: true
         mapEnforced:
-          mapKey: mapValue
+          value:
+            mapKey: mapValue
         arrayEnforced:
+          value:
           - array1
           - array2
+        stringMatchAny:
+          matchAny:
+          - validValue1
+          - validValue2
 
 # Rules to apply to destroyed resources.
 # Has the exact same schema as createdResources.
@@ -152,5 +161,6 @@ createdResources:
   resources:
     - type: google_compute_instance
       enforced:
-        zone: us-central1-a
+        zone:
+          value: us-central1-a
 ```

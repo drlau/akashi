@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	emptyMap = map[interface{}]interface{}{}
+	emptyMap       = map[interface{}]interface{}{}
 	emptyStringMap = map[string]interface{}{}
 )
 
@@ -26,7 +26,7 @@ type resource struct {
 	// TODO support Index
 	// Index interface{}
 
-	Enforced map[string]interface{}
+	Enforced map[string]ruleset.EnforceChange
 	Ignored  map[string]interface{}
 }
 
@@ -69,21 +69,39 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 		}
 		// If the key is enforced...
 		if enforced, ok := r.Enforced[k]; ok {
-			// YAML parses "key: {}" as a map[interface{}]interface{} which is different from map[string]interface{}
-			if mapEnforced, ok := enforced.(map[interface{}]interface{}); ok {
-				enforced = convertMapKeysToString(mapEnforced)
-			}
-
-			// Verify the value is what is expected
-			if !reflect.DeepEqual(v, enforced) {
-				// Not equal - record as failed
-				failedArgs[k] = FailedArg{
-					Expected: enforced,
-					Actual:   v,
+			switch {
+			case enforced.Value != nil:
+				// Verify the value is what is expected
+				if !equal(enforced.Value, v) {
+					// Not equal - record as failed
+					failedArgs[k] = FailedArg{
+						Expected: enforced.Value,
+						Actual:   v,
+					}
+				} else {
+					// equal
+					enforcedArgs[k] = enforced
 				}
-			} else {
-				// equal
-				enforcedArgs[k] = enforced
+			case enforced.MatchAny != nil:
+				found := false
+				for _, val := range enforced.MatchAny {
+					// Verify the value is what is expected
+					if equal(val, v) {
+						// equal
+						enforcedArgs[k] = enforced
+						found = true
+						break
+					}
+				}
+				if !found {
+					failedArgs[k] = FailedArg{
+						Expected: enforced.MatchAny,
+						Actual:   v,
+						MatchAny: true,
+					}
+				}
+			default:
+				// TODO: Tests that key exists and that's it - intended?
 			}
 			// key is not enforced or ignored
 		} else {
@@ -96,7 +114,7 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 		Failed:          failedArgs,
 		Ignored:         ignored,
 		Extra:           extraArgs,
-		MissingEnforced: setDifference(setDifference(r.Enforced, enforcedArgs), failedArgs),
+		MissingEnforced: setDifference(enforcedSetDifference(r.Enforced, enforcedArgs), failedArgs),
 		MissingIgnored:  setDifference(setDifference(r.Ignored, ignored), failedArgs),
 	}
 }
@@ -171,9 +189,31 @@ func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
 	return buf.String()
 }
 
+func equal(expected, value interface{}) bool {
+	// YAML parses "key: {}" as a map[interface{}]interface{} which is different from map[string]interface{}
+	if mapExpected, ok := expected.(map[interface{}]interface{}); ok {
+		expected = convertMapKeysToString(mapExpected)
+	}
+
+	return reflect.DeepEqual(expected, value)
+}
+
 // setDifference returns elements in A but not in B
 // only checks for key equality - ignores values
 func setDifference(a, b map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range a {
+		if _, ok := b[k]; !ok {
+			result[k] = v
+		}
+	}
+
+	return result
+}
+
+// enforcedSetDifference returns elements in A but not in B
+// only checks for key equality - ignores values
+func enforcedSetDifference(a map[string]ruleset.EnforceChange, b map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range a {
 		if _, ok := b[k]; !ok {
