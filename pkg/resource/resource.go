@@ -39,16 +39,16 @@ type CompareOptions struct {
 	AutoFail        bool
 }
 
-func NewResourceFromConfig(c ruleset.ResourceChange) Resource {
+func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resourceRules ruleset.ResourceRules) Resource {
 	ignored := make(map[string]interface{})
 
-	for _, i := range c.Ignored {
+	for _, i := range resourceRules.Ignored {
 		ignored[i] = true
 	}
 	return &resource{
-		Name:     c.Name,
-		Type:     c.Type,
-		Enforced: c.Enforced,
+		Name:     resourceIdentifier.Name,
+		Type:     resourceIdentifier.Type,
+		Enforced: resourceRules.Enforced,
 		Ignored:  ignored,
 	}
 }

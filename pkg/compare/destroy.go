@@ -28,13 +28,13 @@ func NewDestroyComparer(ruleset ruleset.CreateDeleteResourceChanges) *DestroyCom
 		if r.Name != "" && r.Type != "" {
 			// format name and type key
 			// construct Resource and add to map
-			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = newResourceWithOpts(r, defaultOptions)
+			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = newCreateDeleteResourceWithOpts(r, defaultOptions)
 		} else if r.Name != "" {
 			// construct resource and add to name map
-			nameResources[r.Name] = newResourceWithOpts(r, defaultOptions)
+			nameResources[r.Name] = newCreateDeleteResourceWithOpts(r, defaultOptions)
 		} else if r.Type != "" {
 			// construct type and add to type map
-			typeResources[r.Type] = newResourceWithOpts(r, defaultOptions)
+			typeResources[r.Type] = newCreateDeleteResourceWithOpts(r, defaultOptions)
 		}
 	}
 	return &DestroyComparer{

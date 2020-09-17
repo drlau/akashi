@@ -5,6 +5,7 @@ type ResourceValues struct {
 	Computed map[string]interface{}
 }
 
+// TODO: fix merging maps
 func (rv ResourceValues) GetCombined() map[string]interface{} {
 	combined := rv.Values
 	if combined == nil {

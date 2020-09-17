@@ -23,15 +23,19 @@ type resourceWithOpts struct {
 	opts     resource.CompareOptions
 }
 
-func newResourceWithOpts(resourceConfig ruleset.CreateDeleteResourceChange, defaultOptions resource.CompareOptions) resourceWithOpts {
+func newCreateDeleteResourceWithOpts(resourceConfig ruleset.CreateDeleteResourceChange, defaultOptions resource.CompareOptions) resourceWithOpts {
+	return newResourceWithOpts(resourceConfig.ResourceIdentifier, resourceConfig.ResourceRules, resourceConfig.CompareOptions, defaultOptions)
+}
+
+func newResourceWithOpts(resourceIdentifier ruleset.ResourceIdentifier, resourceRules ruleset.ResourceRules, resourceOpts ruleset.CompareOptions, defaultOptions resource.CompareOptions) resourceWithOpts {
 	return resourceWithOpts{
-		resource: resource.NewResourceFromConfig(resourceConfig.ResourceChange),
+		resource: resource.NewResourceFromConfig(resourceIdentifier, resourceRules),
 		opts: resource.CompareOptions{
-			EnforceAll:      boolFromBoolPointer(resourceConfig.CompareOptions.EnforceAll, defaultOptions.EnforceAll),
-			IgnoreExtraArgs: boolFromBoolPointer(resourceConfig.CompareOptions.IgnoreExtraArgs, defaultOptions.IgnoreExtraArgs),
-			IgnoreComputed:  boolFromBoolPointer(resourceConfig.CompareOptions.IgnoreComputed, defaultOptions.IgnoreComputed),
-			RequireAll:      boolFromBoolPointer(resourceConfig.CompareOptions.RequireAll, defaultOptions.RequireAll),
-			AutoFail:        boolFromBoolPointer(resourceConfig.CompareOptions.AutoFail, defaultOptions.AutoFail),
+			EnforceAll:      boolFromBoolPointer(resourceOpts.EnforceAll, defaultOptions.EnforceAll),
+			IgnoreExtraArgs: boolFromBoolPointer(resourceOpts.IgnoreExtraArgs, defaultOptions.IgnoreExtraArgs),
+			IgnoreComputed:  boolFromBoolPointer(resourceOpts.IgnoreComputed, defaultOptions.IgnoreComputed),
+			RequireAll:      boolFromBoolPointer(resourceOpts.RequireAll, defaultOptions.RequireAll),
+			AutoFail:        boolFromBoolPointer(resourceOpts.AutoFail, defaultOptions.AutoFail),
 		},
 	}
 }

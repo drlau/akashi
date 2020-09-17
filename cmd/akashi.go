@@ -18,6 +18,7 @@ import (
 const (
 	createKey  = "create"
 	destroyKey = "destroy"
+	updateKey  = "update"
 )
 
 // TODO: set this dynamically
@@ -110,6 +111,9 @@ func run(_ *cobra.Command, args []string) error {
 	if rs.DestroyedResources != nil {
 		comparers[destroyKey] = compare.NewDestroyComparer(*rs.DestroyedResources)
 	}
+	if rs.UpdatedResources != nil {
+		comparers[updateKey] = compare.NewUpdateComparer(*rs.UpdatedResources)
+	}
 
 	if quiet {
 		os.Exit(runCompare(in, comparers))
@@ -123,6 +127,7 @@ func run(_ *cobra.Command, args []string) error {
 func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
+	updateComparer, hasUpdate := comparers[updateKey]
 
 	for _, r := range rc {
 		if r.IsCreate() && hasCreate {
@@ -131,6 +136,10 @@ func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer)
 			}
 		} else if r.IsDelete() && hasDestroy {
 			if !destroyComparer.Compare(r) {
+				return 1
+			}
+		} else if r.IsUpdate() && hasUpdate {
+			if !updateComparer.Compare(r) {
 				return 1
 			}
 		} else if strict {
@@ -145,6 +154,7 @@ func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compa
 	exitCode := 0
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
+	updateComparer, hasUpdate := comparers[updateKey]
 
 	for _, r := range rc {
 		diff := ""
@@ -153,6 +163,8 @@ func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compa
 			diff, pass = createComparer.Diff(r)
 		} else if r.IsDelete() && hasDestroy {
 			diff, pass = destroyComparer.Diff(r)
+		} else if r.IsUpdate() && hasUpdate {
+			diff, pass = updateComparer.Diff(r)
 		} else {
 			if !strict {
 				continue

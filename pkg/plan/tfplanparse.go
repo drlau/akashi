@@ -39,6 +39,10 @@ func (t *tfPlanChange) IsDelete() bool {
 	return t.ResourceChange.UpdateType == tfplanparse.DestroyResource
 }
 
+func (t *tfPlanChange) IsUpdate() bool {
+	return t.ResourceChange.UpdateType == tfplanparse.UpdateInPlaceResource || t.ResourceChange.UpdateType == tfplanparse.ForceReplaceResource
+}
+
 func (t *tfPlanChange) GetBefore() map[string]interface{} {
 	return t.ResourceChange.GetBeforeResource(tfplanparse.IgnoreSensitive)
 }

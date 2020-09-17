@@ -3,7 +3,7 @@ package ruleset
 type Ruleset struct {
 	CreatedResources   *CreateDeleteResourceChanges `yaml:"createdResources,omitempty"`
 	DestroyedResources *CreateDeleteResourceChanges `yaml:"destroyedResources,omitempty"`
-	// TODO: updated resources
+	UpdatedResources   *UpdateResourceChanges       `yaml:"updatedResources,omitempty"`
 }
 
 type CreateDeleteResourceChanges struct {
@@ -18,8 +18,28 @@ type CreateDeleteResourceChanges struct {
 }
 
 type CreateDeleteResourceChange struct {
-	CompareOptions `yaml:",inline"`
-	ResourceChange `yaml:",inline"`
+	CompareOptions     `yaml:",inline"`
+	ResourceIdentifier `yaml:",inline"`
+	ResourceRules      `yaml:",inline"`
+}
+
+type UpdateResourceChanges struct {
+	// If strict is enabled, all updated resources must match a rule
+	Strict bool `yaml:"strict,omitempty"`
+
+	// Default CompareOptions to use for all resources
+	Default *CompareOptions `yaml:"default,omitempty"`
+
+	// Resources is a list of resource changes to validate against
+	Resources []UpdateResourceChange `yaml:"resources"`
+}
+
+type UpdateResourceChange struct {
+	CompareOptions     `yaml:",inline"`
+	ResourceIdentifier `yaml:",inline"`
+
+	Before *ResourceRules `yaml:"before,omitempty"`
+	After  *ResourceRules `yaml:"after,omitempty"`
 }
 
 type CompareOptions struct {
@@ -38,14 +58,20 @@ type CompareOptions struct {
 
 	// If autoFail is enabled, automatically fails before comparison if a matching resource is found
 	AutoFail *bool `yaml:"autoFail,omitempty"`
+
+	// If IgnoreNoOp is enabled, skips attributes that have not changed
+	// No effect for created or destroyed resource changes
+	// IgnoreNoOp *bool `yaml:"ignoreNoOp,omitempty"`
 }
 
-type ResourceChange struct {
+type ResourceIdentifier struct {
 	Name string `yaml:"name,omitempty"`
 	Type string `yaml:"type,omitempty"`
 	// TODO: index
 	// Index interface{} `yaml:"index,omitempty"`
+}
 
+type ResourceRules struct {
 	Enforced map[string]EnforceChange `yaml:"enforced,omitempty"`
 	Ignored  []string                 `yaml:"ignored,omitempty"`
 }
