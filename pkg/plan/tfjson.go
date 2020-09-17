@@ -46,6 +46,10 @@ func (j *jsonPlanChange) IsDelete() bool {
 	return j.ResourceChange.Change.Actions.Delete()
 }
 
+func (j *jsonPlanChange) IsUpdate() bool {
+	return j.ResourceChange.Change.Actions.Update()
+}
+
 func (j *jsonPlanChange) GetBefore() map[string]interface{} {
 	if j.ResourceChange.Change.Before != nil {
 		return j.ResourceChange.Change.Before.(map[string]interface{})
