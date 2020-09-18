@@ -6,6 +6,7 @@ type FakeResourceChange struct {
 	TypeReturns     string
 	CreateReturns   bool
 	DeleteReturns   bool
+	NoOpReturns     bool
 	UpdateReturns   bool
 	BeforeReturns   map[string]interface{}
 	AfterReturns    map[string]interface{}
@@ -32,6 +33,10 @@ func (r *FakeResourceChange) IsDelete() bool {
 	return r.DeleteReturns
 }
 
+func (r *FakeResourceChange) IsNoOp() bool {
+	return r.NoOpReturns
+}
+
 func (r *FakeResourceChange) IsUpdate() bool {
 	return r.UpdateReturns
 }
@@ -41,6 +46,14 @@ func (r *FakeResourceChange) GetBefore() map[string]interface{} {
 }
 
 func (r *FakeResourceChange) GetAfter() map[string]interface{} {
+	return r.AfterReturns
+}
+
+func (r *FakeResourceChange) GetBeforeChangedOnly() map[string]interface{} {
+	return r.BeforeReturns
+}
+
+func (r *FakeResourceChange) GetAfterChangedOnly() map[string]interface{} {
 	return r.AfterReturns
 }
 

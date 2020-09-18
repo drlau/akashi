@@ -147,6 +147,39 @@ createdResources:
 # Rules to apply to destroyed resources.
 # Has the exact same schema as createdResources.
 destroyedResources:
+
+# Rules to apply to updated resources.
+updatedResources:
+  # Set to true if you want all updated resources to match a rule.
+  # Default is false.
+  strict: true
+
+  # Default compare options to apply to all resources.
+  # If a resource specifies the same option, the resource's value will be used.
+  # All options for created and destroyed resources work here, but also has a few additional options that can be enabled
+  default:
+    # Set to true if you want to ignore all unchanged attributes
+    # Default is false.
+    ignoreNoOp: true
+
+  # Rules to enforce on the attributes before the planned changes
+  # Consists of ignored and enforced, with the same behaviour as created and destroyed resources
+  before:
+    # List of arguments to ignore.
+    # Default is empty.
+    ignored:
+      - ignored-arg-1
+      - ignored-arg-2
+
+    # List of arguments to enforce.
+    # Default is empty.
+    enforced:
+      stringEnforced:
+        value: string
+
+  # Rules to enforce on the attributes after the planned changes
+  # Same schema as before.
+  after:
 ```
 
 ### Example
