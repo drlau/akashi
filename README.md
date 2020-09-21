@@ -8,7 +8,7 @@ Still a WIP project. Supports `terraform` v0.12 currently.
 - [x] JSON Output
 - [x] stdout output
 - [x] Map / Array rules
-- [ ] Updated resources
+- [x] Updated resources
 - [ ] Index matching
 - [ ] Module matching
 - [ ] Multiple rule matching
