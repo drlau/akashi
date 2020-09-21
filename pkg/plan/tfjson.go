@@ -46,6 +46,10 @@ func (j *jsonPlanChange) IsDelete() bool {
 	return j.ResourceChange.Change.Actions.Delete()
 }
 
+func (j *jsonPlanChange) IsNoOp() bool {
+	return j.ResourceChange.Change.Actions.NoOp()
+}
+
 func (j *jsonPlanChange) IsUpdate() bool {
 	return j.ResourceChange.Change.Actions.Update()
 }
@@ -62,6 +66,14 @@ func (j *jsonPlanChange) GetAfter() map[string]interface{} {
 		return j.ResourceChange.Change.After.(map[string]interface{})
 	}
 	return map[string]interface{}{}
+}
+
+func (j *jsonPlanChange) GetBeforeChangedOnly() map[string]interface{} {
+	return j.GetBefore()
+}
+
+func (j *jsonPlanChange) GetAfterChangedOnly() map[string]interface{} {
+	return j.GetAfter()
 }
 
 func (j *jsonPlanChange) GetComputed() map[string]interface{} {

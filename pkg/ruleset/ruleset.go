@@ -61,7 +61,7 @@ type CompareOptions struct {
 
 	// If IgnoreNoOp is enabled, skips attributes that have not changed
 	// No effect for created or destroyed resource changes
-	// IgnoreNoOp *bool `yaml:"ignoreNoOp,omitempty"`
+	IgnoreNoOp *bool `yaml:"ignoreNoOp,omitempty"`
 }
 
 type ResourceIdentifier struct {
