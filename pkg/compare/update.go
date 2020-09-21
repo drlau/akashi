@@ -64,11 +64,13 @@ func NewUpdateComparer(ruleset ruleset.UpdateResourceChanges) *UpdateComparer {
 func (c *UpdateComparer) Compare(r plan.ResourceChange) bool {
 	nameType := constructNameTypeKey(r)
 	beforeChanges := resource.ResourceValues{
-		Values: r.GetBefore(),
+		Values:        r.GetBefore(),
+		ChangedValues: r.GetBeforeChangedOnly(),
 	}
 	afterChanges := resource.ResourceValues{
-		Values:   r.GetAfter(),
-		Computed: r.GetComputed(),
+		Values:        r.GetAfter(),
+		ChangedValues: r.GetAfterChangedOnly(),
+		Computed:      r.GetComputed(),
 	}
 
 	var (
@@ -108,11 +110,13 @@ func (c *UpdateComparer) Diff(r plan.ResourceChange) (string, bool) {
 	nameType := constructNameTypeKey(r)
 	// TODO: handle IgnoreNoOp
 	beforeChanges := resource.ResourceValues{
-		Values: r.GetBefore(),
+		Values:        r.GetBefore(),
+		ChangedValues: r.GetBeforeChangedOnly(),
 	}
 	afterChanges := resource.ResourceValues{
-		Values:   r.GetAfter(),
-		Computed: r.GetComputed(),
+		Values:        r.GetAfter(),
+		ChangedValues: r.GetAfterChangedOnly(),
+		Computed:      r.GetComputed(),
 	}
 
 	var ur updateResource

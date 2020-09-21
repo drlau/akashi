@@ -36,6 +36,7 @@ func newResourceWithOpts(resourceIdentifier ruleset.ResourceIdentifier, resource
 			IgnoreComputed:  boolFromBoolPointer(resourceOpts.IgnoreComputed, defaultOptions.IgnoreComputed),
 			RequireAll:      boolFromBoolPointer(resourceOpts.RequireAll, defaultOptions.RequireAll),
 			AutoFail:        boolFromBoolPointer(resourceOpts.AutoFail, defaultOptions.AutoFail),
+			IgnoreNoOp:      boolFromBoolPointer(resourceOpts.IgnoreNoOp, defaultOptions.IgnoreNoOp),
 		},
 	}
 }
@@ -58,6 +59,7 @@ func makeDefaultCompareOptions(config *ruleset.CompareOptions) resource.CompareO
 		IgnoreComputed:  boolFromBoolPointer(config.IgnoreComputed, false),
 		RequireAll:      boolFromBoolPointer(config.RequireAll, false),
 		AutoFail:        boolFromBoolPointer(config.AutoFail, false),
+		IgnoreNoOp:      boolFromBoolPointer(config.IgnoreNoOp, false),
 	}
 }
 

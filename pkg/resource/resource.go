@@ -37,6 +37,7 @@ type CompareOptions struct {
 	IgnoreComputed  bool
 	RequireAll      bool
 	AutoFail        bool
+	IgnoreNoOp      bool
 }
 
 func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resourceRules ruleset.ResourceRules) Resource {
@@ -124,7 +125,9 @@ func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
 		return false
 	}
 	values := rv.Values
-	if !opts.IgnoreComputed {
+	if opts.IgnoreNoOp && rv.ChangedValues != nil {
+		values = rv.ChangedValues
+	} else if !opts.IgnoreComputed {
 		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
@@ -148,7 +151,9 @@ func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
 	}
 	var buf strings.Builder
 	values := rv.Values
-	if !opts.IgnoreComputed {
+	if opts.IgnoreNoOp && rv.ChangedValues != nil {
+		values = rv.ChangedValues
+	} else if !opts.IgnoreComputed {
 		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
