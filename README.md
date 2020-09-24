@@ -16,6 +16,12 @@ Still a WIP project. Supports `terraform` v0.12 currently.
 - [ ] Combining multiple rulesets
 - [ ] Customizable output
 
+## Why
+
+By parsing the `terraform plan` result, you can validate changes shown in the `plan` output before actually applying. Also, it can be used to track unexpected changes during routine operations that may have occured from misconfiguration or infrastructure drift.
+
+For example, say you had a `google_container_node_pool` with `autoscaling` configured, and due to some incident you had to modify the `autoscaling` configuration outside of `terraform`. Some time later, you update the `version` of your `google_container_node_pool` as a routine operation. Due to the declarative nature of `terraform`, the previous configuration of `autoscaling` would be applied and overwrite the modified configuration set during the incident. This might be unintentional and would not be caught from parsing the `terraform` configuration, but can be caught by validating the `terraform plan` output.
+
 ## Installation
 
 ```bash
