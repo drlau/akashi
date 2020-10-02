@@ -1,4 +1,4 @@
-# Akashi
+# Akashi / 証
 
 Akashi is a Go tool that can be used to parse `terraform plan` outputs and validate the changes.
 
