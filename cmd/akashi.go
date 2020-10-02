@@ -21,8 +21,9 @@ const (
 	updateKey  = "update"
 )
 
-// TODO: set this dynamically
-const version = "0.0.5"
+var (
+	version = "dev"
+)
 
 var (
 	file          string
