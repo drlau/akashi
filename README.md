@@ -105,12 +105,12 @@ createdResources:
     -
       # Resource name to match on.
       # At least one of "name" or "type" must be set.
-      # Defaults is empty.
+      # Default is empty.
       name: resource-name
 
       # Resource type to match on.
       # At least one of "name" or "type" must be set.
-      # Defaults is empty.
+      # Default is empty.
       type: resource-type
 
       # The same compare options from "default" can be specified per resource.
