@@ -3,7 +3,7 @@ module github.com/drlau/akashi
 go 1.14
 
 require (
-	github.com/drlau/tfplanparse v0.0.11
+	github.com/drlau/tfplanparse v0.0.12
 	github.com/google/go-cmp v0.5.1
 	github.com/hashicorp/terraform-json v0.6.0
 	github.com/mattn/go-colorable v0.1.7

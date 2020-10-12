@@ -38,11 +38,12 @@ var (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "akashi <path to ruleset>",
-		Short: "Akashi / 証",
-		Long:  `Validate "terraform plan" changes against a customizable ruleset`,
-		Args:  cobra.ExactArgs(1),
-		RunE:  run,
+		Use:          "akashi <path to ruleset>",
+		Short:        "Akashi / 証",
+		Long:         `Validate "terraform plan" changes against a customizable ruleset`,
+		Args:         cobra.ExactArgs(1),
+		RunE:         run,
+		SilenceUsage: true,
 	}
 
 	cmd.SetVersionTemplate(version)

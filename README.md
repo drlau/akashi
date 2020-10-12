@@ -102,7 +102,7 @@ createdResources:
 
   # List of rules.
   resources:
-  - resource:
+    -
       # Resource name to match on.
       # At least one of "name" or "type" must be set.
       # Defaults is empty.
@@ -168,24 +168,34 @@ updatedResources:
     # Default is false.
     ignoreNoOp: true
 
-  # Rules to enforce on the attributes before the planned changes
-  # Consists of ignored and enforced, with the same behaviour as created and destroyed resources
-  before:
-    # List of arguments to ignore.
-    # Default is empty.
-    ignored:
-      - ignored-arg-1
-      - ignored-arg-2
+  # List of rules.
+  resources:
+  -
+    # Similar to created and destroyed resources, matching can be done on a name and/or type of resource
+    name: resource-name
+    type: resource-type
 
-    # List of arguments to enforce.
-    # Default is empty.
-    enforced:
-      stringEnforced:
-        value: string
+    # Every compare option can also be specified at resource level, overriding the top level default
+    ignoreNoOp: true
 
-  # Rules to enforce on the attributes after the planned changes
-  # Same schema as before.
-  after:
+    # Rules to enforce on the attributes before the planned changes
+    # Consists of ignored and enforced, with the same behaviour as created and destroyed resources
+    before:
+      # List of arguments to ignore.
+      # Default is empty.
+      ignored:
+        - ignored-arg-1
+        - ignored-arg-2
+
+      # List of arguments to enforce.
+      # Default is empty.
+      enforced:
+        stringEnforced:
+          value: string
+
+    # Rules to enforce on the attributes after the planned changes
+    # Same schema as before.
+    after:
 ```
 
 ### Example
