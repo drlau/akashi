@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 
+	comparecmd "github.com/drlau/akashi/pkg/cmd/compare"
+	diffcmd "github.com/drlau/akashi/pkg/cmd/diff"
+	versioncmd "github.com/drlau/akashi/pkg/cmd/version"
 	"github.com/drlau/akashi/pkg/compare"
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/ruleset"
@@ -38,7 +41,7 @@ var (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "akashi <path to ruleset>",
+		Use:          "akashi <command> <path to ruleset>",
 		Short:        "Akashi / 証",
 		Long:         `Validate "terraform plan" changes against a customizable ruleset`,
 		Args:         cobra.ExactArgs(1),
@@ -58,14 +61,9 @@ func NewCommand() *cobra.Command {
 	// TODO
 	// cmd.Flags().BoolVarP(&verbose, "verbose", "V", false, "enable verbose output")
 
-	versionCmd := &cobra.Command{
-		Use:    "version",
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(version)
-		},
-	}
-	cmd.AddCommand(versionCmd)
+	cmd.AddCommand(comparecmd.NewCmdCompare())
+	cmd.AddCommand(diffcmd.NewCmdDiff())
+	cmd.AddCommand(versioncmd.NewCmdVersion(os.Stdout, version))
 
 	return cmd
 }
@@ -118,10 +116,12 @@ func run(_ *cobra.Command, args []string) error {
 	}
 
 	if quiet {
+		fmt.Fprintln(os.Stderr, `[WARN] -q is deprecated. Please run "akashi compare" instead.`)
 		os.Exit(runCompare(in, comparers))
 	}
 	out := utils.NewOutput(noColor)
 
+	fmt.Fprintln(os.Stderr, `[WARN] no command is deprecated. Please run "akashi diff" instead.`)
 	os.Exit(runDiff(out, in, comparers))
 	return nil
 }
