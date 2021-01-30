@@ -12,29 +12,27 @@ import (
 type DestroyComparer struct {
 	Strict bool
 
-	NameResources     map[string]resourceWithOpts
-	TypeResources     map[string]resourceWithOpts
-	NameTypeResources map[string]resourceWithOpts
+	NameResources     map[string]Resource
+	TypeResources     map[string]Resource
+	NameTypeResources map[string]Resource
 }
 
 func NewDestroyComparer(ruleset ruleset.CreateDeleteResourceChanges) *DestroyComparer {
-	defaultOptions := makeDefaultCompareOptions(ruleset.Default)
-	nameTypeResources := make(map[string]resourceWithOpts)
-	typeResources := make(map[string]resourceWithOpts)
-	nameResources := make(map[string]resourceWithOpts)
+	defaultOptions := resource.NewCompareOptions(ruleset.Default)
+	nameTypeResources := make(map[string]Resource)
+	typeResources := make(map[string]Resource)
+	nameResources := make(map[string]Resource)
 
 	// Iterate over all the resources
 	for _, r := range ruleset.Resources {
+		res := resource.NewResourceFromConfig(r.ResourceIdentifier, r.ResourceRules, r.CompareOptions, defaultOptions)
 		if r.Name != "" && r.Type != "" {
 			// format name and type key
-			// construct Resource and add to map
-			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = newCreateDeleteResourceWithOpts(r, defaultOptions)
+			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = res
 		} else if r.Name != "" {
-			// construct resource and add to name map
-			nameResources[r.Name] = newCreateDeleteResourceWithOpts(r, defaultOptions)
+			nameResources[r.Name] = res
 		} else if r.Type != "" {
-			// construct type and add to type map
-			typeResources[r.Type] = newCreateDeleteResourceWithOpts(r, defaultOptions)
+			typeResources[r.Type] = res
 		}
 	}
 	return &DestroyComparer{
@@ -52,11 +50,11 @@ func (c *DestroyComparer) Compare(r plan.ResourceChange) bool {
 	}
 
 	if ro, ok := c.NameTypeResources[nameType]; ok {
-		return ro.compare(changes)
+		return ro.Compare(changes)
 	} else if ro, ok := c.NameResources[r.GetName()]; ok {
-		return ro.compare(changes)
+		return ro.Compare(changes)
 	} else if ro, ok := c.TypeResources[r.GetType()]; ok {
-		return ro.compare(changes)
+		return ro.Compare(changes)
 	}
 
 	return !c.Strict
@@ -68,7 +66,7 @@ func (c *DestroyComparer) Diff(r plan.ResourceChange) (string, bool) {
 		Values: r.GetBefore(),
 	}
 
-	var ro resourceWithOpts
+	var ro Resource
 	if rs, ok := c.NameTypeResources[nameType]; ok {
 		ro = rs
 	} else if rs, ok := c.NameResources[r.GetName()]; ok {
@@ -83,7 +81,7 @@ func (c *DestroyComparer) Diff(r plan.ResourceChange) (string, bool) {
 		return fmt.Sprintf("%s %s (no matching rule)", utils.Yellow("!"), r.GetAddress()), true
 	}
 
-	diff := ro.diff(changes)
+	diff := ro.Diff(changes)
 	if diff != "" {
 		return fmt.Sprintf("%s %s\n%s", utils.Red("×"), utils.Red(r.GetAddress()), diff), false
 	}

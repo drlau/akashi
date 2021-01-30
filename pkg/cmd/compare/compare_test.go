@@ -6,7 +6,6 @@ import (
 	"github.com/drlau/akashi/pkg/compare"
 	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
 	"github.com/drlau/akashi/pkg/plan"
-	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
 )
 
 func TestRunCompare(t *testing.T) {
@@ -22,7 +21,7 @@ func TestRunCompare(t *testing.T) {
 				},
 			},
 			resourceChange: []plan.ResourceChange{
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -37,7 +36,7 @@ func TestRunCompare(t *testing.T) {
 				},
 			},
 			resourceChange: []plan.ResourceChange{
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -52,7 +51,7 @@ func TestRunCompare(t *testing.T) {
 				},
 			},
 			resourceChange: []plan.ResourceChange{
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					NameReturns: "name",
 					TypeReturns: "type",
 				},
@@ -66,12 +65,12 @@ func TestRunCompare(t *testing.T) {
 				},
 			},
 			resourceChange: []plan.ResourceChange{
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -89,12 +88,12 @@ func TestRunCompare(t *testing.T) {
 				},
 			},
 			resourceChange: []plan.ResourceChange{
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&planfakes.FakeResourceChange{
+				&comparefakes.FakeResourceChange{
 					DeleteReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",

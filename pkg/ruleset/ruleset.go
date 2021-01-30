@@ -18,7 +18,7 @@ type CreateDeleteResourceChanges struct {
 }
 
 type CreateDeleteResourceChange struct {
-	CompareOptions     `yaml:",inline"`
+	*CompareOptions    `yaml:",inline"`
 	ResourceIdentifier `yaml:",inline"`
 	ResourceRules      `yaml:",inline"`
 }
@@ -35,7 +35,7 @@ type UpdateResourceChanges struct {
 }
 
 type UpdateResourceChange struct {
-	CompareOptions     `yaml:",inline"`
+	*CompareOptions    `yaml:",inline"`
 	ResourceIdentifier `yaml:",inline"`
 
 	Before *ResourceRules `yaml:"before,omitempty"`

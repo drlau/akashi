@@ -19,12 +19,12 @@ type UpdateComparer struct {
 }
 
 type updateResource struct {
-	Before *resourceWithOpts
-	After  *resourceWithOpts
+	Before Resource
+	After  Resource
 }
 
 func NewUpdateComparer(ruleset ruleset.UpdateResourceChanges) *UpdateComparer {
-	defaultOptions := makeDefaultCompareOptions(ruleset.Default)
+	defaultOptions := resource.NewCompareOptions(ruleset.Default)
 	nameTypeResources := make(map[string]updateResource)
 	typeResources := make(map[string]updateResource)
 	nameResources := make(map[string]updateResource)
@@ -33,23 +33,18 @@ func NewUpdateComparer(ruleset ruleset.UpdateResourceChanges) *UpdateComparer {
 	for _, r := range ruleset.Resources {
 		var ur updateResource
 		if r.Before != nil {
-			ro := newResourceWithOpts(r.ResourceIdentifier, *r.Before, r.CompareOptions, defaultOptions)
-			ur.Before = &ro
+			ur.Before = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.Before, r.CompareOptions, defaultOptions)
 		}
 		if r.After != nil {
-			ro := newResourceWithOpts(r.ResourceIdentifier, *r.After, r.CompareOptions, defaultOptions)
-			ur.After = &ro
+			ur.After = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.After, r.CompareOptions, defaultOptions)
 		}
 
 		if r.Name != "" && r.Type != "" {
 			// format name and type key
-			// construct Resource and add to map
 			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = ur
 		} else if r.Name != "" {
-			// construct resource and add to name map
 			nameResources[r.Name] = ur
 		} else if r.Type != "" {
-			// construct type and add to type map
 			typeResources[r.Type] = ur
 		}
 	}
@@ -79,26 +74,26 @@ func (c *UpdateComparer) Compare(r plan.ResourceChange) bool {
 	)
 	if ro, ok := c.NameTypeResources[nameType]; ok {
 		if ro.Before != nil {
-			beforeOk = ro.Before.compare(beforeChanges)
+			beforeOk = ro.Before.Compare(beforeChanges)
 		}
 		if ro.After != nil {
-			afterOk = ro.After.compare(afterChanges)
+			afterOk = ro.After.Compare(afterChanges)
 		}
 		return beforeOk && afterOk
 	} else if ro, ok := c.NameResources[r.GetName()]; ok {
 		if ro.Before != nil {
-			beforeOk = ro.Before.compare(beforeChanges)
+			beforeOk = ro.Before.Compare(beforeChanges)
 		}
 		if ro.After != nil {
-			afterOk = ro.After.compare(afterChanges)
+			afterOk = ro.After.Compare(afterChanges)
 		}
 		return beforeOk && afterOk
 	} else if ro, ok := c.TypeResources[r.GetType()]; ok {
 		if ro.Before != nil {
-			beforeOk = ro.Before.compare(beforeChanges)
+			beforeOk = ro.Before.Compare(beforeChanges)
 		}
 		if ro.After != nil {
-			afterOk = ro.After.compare(afterChanges)
+			afterOk = ro.After.Compare(afterChanges)
 		}
 		return beforeOk && afterOk
 	}
@@ -140,7 +135,7 @@ func (c *UpdateComparer) Diff(r plan.ResourceChange) (string, bool) {
 	)
 
 	if ur.Before != nil {
-		diff := ur.Before.diff(beforeChanges)
+		diff := ur.Before.Diff(beforeChanges)
 		if diff != "" {
 			equal = false
 			result.WriteString(fmt.Sprintf("%s %s %s\n%s\n", utils.Red("×"), utils.Red(r.GetAddress()), utils.Red("(before)"), diff))
@@ -148,7 +143,7 @@ func (c *UpdateComparer) Diff(r plan.ResourceChange) (string, bool) {
 	}
 
 	if ur.After != nil {
-		diff := ur.After.diff(afterChanges)
+		diff := ur.After.Diff(afterChanges)
 		if diff != "" {
 			equal = false
 			result.WriteString(fmt.Sprintf("%s %s %s\n%s\n", utils.Red("×"), utils.Red(r.GetAddress()), utils.Red("(after)"), diff))

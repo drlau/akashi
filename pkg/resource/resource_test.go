@@ -10,7 +10,7 @@ import (
 
 func TestResourceCompareResult(t *testing.T) {
 	cases := map[string]struct {
-		resource Resource
+		resource *resource
 		expected *CompareResult
 		values   map[string]interface{}
 	}{
@@ -21,6 +21,7 @@ func TestResourceCompareResult(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key": "value",
@@ -45,6 +46,7 @@ func TestResourceCompareResult(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key": "value2",
@@ -73,6 +75,7 @@ func TestResourceCompareResult(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key":     "value",
@@ -100,6 +103,7 @@ func TestResourceCompareResult(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key":   "value",
@@ -130,6 +134,7 @@ func TestResourceCompareResult(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key": "value",
@@ -156,6 +161,7 @@ func TestResourceCompareResult(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key": "value",
@@ -176,6 +182,7 @@ func TestResourceCompareResult(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key":   "value",
@@ -200,6 +207,7 @@ func TestResourceCompareResult(t *testing.T) {
 					"key":    true,
 					"second": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: map[string]interface{}{
 				"key": "value",
@@ -231,8 +239,7 @@ func TestResourceCompareResult(t *testing.T) {
 
 func TestResourceCompare(t *testing.T) {
 	cases := map[string]struct {
-		resource Resource
-		opts     CompareOptions
+		resource *resource
 		values   ResourceValues
 		expected bool
 	}{
@@ -243,6 +250,7 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -258,6 +266,7 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value2",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -276,6 +285,7 @@ func TestResourceCompare(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -292,6 +302,7 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -308,9 +319,9 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				IgnoreExtraArgs: true,
+				CompareOptions: &CompareOptions{
+					IgnoreExtraArgs: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -330,6 +341,7 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -348,9 +360,9 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				EnforceAll: true,
+				CompareOptions: &CompareOptions{
+					EnforceAll: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -364,6 +376,7 @@ func TestResourceCompare(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -377,6 +390,7 @@ func TestResourceCompare(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -391,9 +405,9 @@ func TestResourceCompare(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
-			},
-			opts: CompareOptions{
-				IgnoreExtraArgs: true,
+				CompareOptions: &CompareOptions{
+					IgnoreExtraArgs: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -414,6 +428,7 @@ func TestResourceCompare(t *testing.T) {
 					"key":    true,
 					"second": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -434,9 +449,9 @@ func TestResourceCompare(t *testing.T) {
 					"key":    true,
 					"second": true,
 				},
-			},
-			opts: CompareOptions{
-				RequireAll: true,
+				CompareOptions: &CompareOptions{
+					RequireAll: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -453,9 +468,9 @@ func TestResourceCompare(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				AutoFail: true,
+				CompareOptions: &CompareOptions{
+					AutoFail: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -465,9 +480,10 @@ func TestResourceCompare(t *testing.T) {
 			expected: false,
 		},
 		"autofail with no enforced or ignored": {
-			resource: &resource{},
-			opts: CompareOptions{
-				AutoFail: true,
+			resource: &resource{
+				CompareOptions: &CompareOptions{
+					AutoFail: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -480,7 +496,7 @@ func TestResourceCompare(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.resource.Compare(tc.values, tc.opts); got != tc.expected {
+			if got := tc.resource.Compare(tc.values); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
 		})
@@ -490,8 +506,7 @@ func TestResourceCompare(t *testing.T) {
 // TODO: should verify order of expected strings
 func TestResourceDiff(t *testing.T) {
 	cases := map[string]struct {
-		resource Resource
-		opts     CompareOptions
+		resource *resource
 		values   ResourceValues
 		expected []string
 	}{
@@ -502,6 +517,7 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -517,6 +533,7 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value2",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -540,6 +557,7 @@ func TestResourceDiff(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"ignored": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -556,6 +574,7 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -575,9 +594,9 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				IgnoreExtraArgs: true,
+				CompareOptions: &CompareOptions{
+					IgnoreExtraArgs: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -597,6 +616,7 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -615,9 +635,9 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				EnforceAll: true,
+				CompareOptions: &CompareOptions{
+					EnforceAll: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -634,6 +654,7 @@ func TestResourceDiff(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -647,6 +668,7 @@ func TestResourceDiff(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -664,9 +686,9 @@ func TestResourceDiff(t *testing.T) {
 				Ignored: map[string]interface{}{
 					"key": true,
 				},
-			},
-			opts: CompareOptions{
-				IgnoreExtraArgs: true,
+				CompareOptions: &CompareOptions{
+					IgnoreExtraArgs: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -687,6 +709,7 @@ func TestResourceDiff(t *testing.T) {
 					"key":    true,
 					"second": true,
 				},
+				CompareOptions: &CompareOptions{},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -707,9 +730,9 @@ func TestResourceDiff(t *testing.T) {
 					"key":    true,
 					"second": true,
 				},
-			},
-			opts: CompareOptions{
-				RequireAll: true,
+				CompareOptions: &CompareOptions{
+					RequireAll: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -729,9 +752,9 @@ func TestResourceDiff(t *testing.T) {
 						Value: "value",
 					},
 				},
-			},
-			opts: CompareOptions{
-				AutoFail: true,
+				CompareOptions: &CompareOptions{
+					AutoFail: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -741,9 +764,10 @@ func TestResourceDiff(t *testing.T) {
 			expected: []string{"AutoFail set to true"},
 		},
 		"autofail with no enforced or ignored": {
-			resource: &resource{},
-			opts: CompareOptions{
-				AutoFail: true,
+			resource: &resource{
+				CompareOptions: &CompareOptions{
+					AutoFail: true,
+				},
 			},
 			values: ResourceValues{
 				Values: map[string]interface{}{
@@ -756,7 +780,7 @@ func TestResourceDiff(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			got := tc.resource.Diff(tc.values, tc.opts)
+			got := tc.resource.Diff(tc.values)
 			for _, s := range tc.expected {
 				if !strings.Contains(got, s) {
 					t.Errorf("Result string did not contain %v", s)

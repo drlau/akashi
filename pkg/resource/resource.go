@@ -14,12 +14,6 @@ var (
 	emptyStringMap = map[string]interface{}{}
 )
 
-type Resource interface {
-	CompareResult(map[string]interface{}) *CompareResult
-	Compare(ResourceValues, CompareOptions) bool
-	Diff(ResourceValues, CompareOptions) string
-}
-
 type resource struct {
 	Name string
 	Type string
@@ -28,19 +22,11 @@ type resource struct {
 
 	Enforced map[string]ruleset.EnforceChange
 	Ignored  map[string]interface{}
+
+	CompareOptions *CompareOptions
 }
 
-// TODO: consider moving this to functions
-type CompareOptions struct {
-	EnforceAll      bool
-	IgnoreExtraArgs bool
-	IgnoreComputed  bool
-	RequireAll      bool
-	AutoFail        bool
-	IgnoreNoOp      bool
-}
-
-func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resourceRules ruleset.ResourceRules) Resource {
+func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resourceRules ruleset.ResourceRules, resourceOpts *ruleset.CompareOptions, defaultOpts *CompareOptions) *resource {
 	ignored := make(map[string]interface{})
 
 	for _, i := range resourceRules.Ignored {
@@ -51,6 +37,8 @@ func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resour
 		Type:     resourceIdentifier.Type,
 		Enforced: resourceRules.Enforced,
 		Ignored:  ignored,
+
+		CompareOptions: newCompareOptionsWithDefault(resourceOpts, defaultOpts),
 	}
 }
 
@@ -120,57 +108,57 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 	}
 }
 
-func (r *resource) Compare(rv ResourceValues, opts CompareOptions) bool {
-	if opts.AutoFail {
+func (r *resource) Compare(rv ResourceValues) bool {
+	if r.CompareOptions.AutoFail {
 		return false
 	}
 	values := rv.Values
-	if opts.IgnoreNoOp && rv.ChangedValues != nil {
+	if r.CompareOptions.IgnoreNoOp && rv.ChangedValues != nil {
 		values = rv.ChangedValues
-	} else if !opts.IgnoreComputed {
+	} else if !r.CompareOptions.IgnoreComputed {
 		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
 
-	if opts.EnforceAll && len(cmp.MissingEnforced) > 0 {
+	if r.CompareOptions.EnforceAll && len(cmp.MissingEnforced) > 0 {
 		return false
 	}
-	if !opts.IgnoreExtraArgs && len(cmp.Extra) != 0 {
+	if !r.CompareOptions.IgnoreExtraArgs && len(cmp.Extra) != 0 {
 		return false
 	}
-	if opts.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
+	if r.CompareOptions.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
 		return false
 	}
 
 	return len(cmp.Failed) == 0
 }
 
-func (r *resource) Diff(rv ResourceValues, opts CompareOptions) string {
-	if opts.AutoFail {
+func (r *resource) Diff(rv ResourceValues) string {
+	if r.CompareOptions.AutoFail {
 		return utils.Red("AutoFail set to true")
 	}
 	var buf strings.Builder
 	values := rv.Values
-	if opts.IgnoreNoOp && rv.ChangedValues != nil {
+	if r.CompareOptions.IgnoreNoOp && rv.ChangedValues != nil {
 		values = rv.ChangedValues
-	} else if !opts.IgnoreComputed {
+	} else if !r.CompareOptions.IgnoreComputed {
 		values = rv.GetCombined()
 	}
 	cmp := r.CompareResult(values)
 
-	if opts.EnforceAll && len(cmp.MissingEnforced) > 0 {
+	if r.CompareOptions.EnforceAll && len(cmp.MissingEnforced) > 0 {
 		buf.WriteString(utils.Red("Missing enforced arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
 			buf.WriteString(utils.Red(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
-	if !opts.IgnoreExtraArgs && len(cmp.Extra) != 0 {
+	if !r.CompareOptions.IgnoreExtraArgs && len(cmp.Extra) != 0 {
 		buf.WriteString(utils.Yellow("Extra arguments:\n"))
 		for arg, _ := range cmp.Extra {
 			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
-	if opts.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
+	if r.CompareOptions.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
 		buf.WriteString(utils.Yellow("Missing enforced and ignored arguments:\n"))
 		for arg, _ := range cmp.MissingEnforced {
 			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))

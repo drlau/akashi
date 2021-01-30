@@ -14,10 +14,10 @@ func (r *FakeResource) CompareResult(values map[string]interface{}) *resource.Co
 	return r.CompareResultReturns
 }
 
-func (r *FakeResource) Compare(rv resource.ResourceValues, opts resource.CompareOptions) bool {
+func (r *FakeResource) Compare(rv resource.ResourceValues) bool {
 	return r.CompareReturns
 }
 
-func (r *FakeResource) Diff(rv resource.ResourceValues, opts resource.CompareOptions) string {
+func (r *FakeResource) Diff(rv resource.ResourceValues) string {
 	return r.DiffReturns
 }
