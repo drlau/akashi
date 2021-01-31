@@ -27,7 +27,7 @@ func NewCreateComparer(ruleset ruleset.CreateDeleteResourceChanges) *CreateCompa
 
 	// Iterate over all the resources
 	for _, r := range ruleset.Resources {
-		res := resource.NewResourceFromConfig(r.ResourceIdentifier, r.ResourceRules, r.CompareOptions, defaultOptions)
+		res := resource.NewResourceFromConfig(r.ResourceIdentifier, r.ResourceRules, &r.CompareOptions, defaultOptions)
 		if r.Name != "" && r.Type != "" {
 			// format name and type key
 			nameTypeResources[fmt.Sprintf("%s.%s", r.Type, r.Name)] = res

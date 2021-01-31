@@ -33,10 +33,10 @@ func NewUpdateComparer(ruleset ruleset.UpdateResourceChanges) *UpdateComparer {
 	for _, r := range ruleset.Resources {
 		var ur updateResource
 		if r.Before != nil {
-			ur.Before = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.Before, r.CompareOptions, defaultOptions)
+			ur.Before = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.Before, &r.CompareOptions, defaultOptions)
 		}
 		if r.After != nil {
-			ur.After = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.After, r.CompareOptions, defaultOptions)
+			ur.After = resource.NewResourceFromConfig(r.ResourceIdentifier, *r.After, &r.CompareOptions, defaultOptions)
 		}
 
 		if r.Name != "" && r.Type != "" {
