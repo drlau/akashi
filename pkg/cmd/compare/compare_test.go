@@ -11,13 +11,13 @@ import (
 
 func TestRunCompare(t *testing.T) {
 	cases := map[string]struct {
-		comparers    map[string]compare.Comparer
+		comparers    compare.ComparerSet
 		resourcePlan []plan.ResourcePlan
 		expected     int
 	}{
 		"create returns false with create resource": {
-			comparers: map[string]compare.Comparer{
-				createKey: &comparefakes.FakeComparer{
+			comparers: compare.ComparerSet{
+				CreateComparer: &comparefakes.FakeComparer{
 					CompareReturns: false,
 				},
 			},
@@ -31,8 +31,8 @@ func TestRunCompare(t *testing.T) {
 			expected: 1,
 		},
 		"create returns true with create resource": {
-			comparers: map[string]compare.Comparer{
-				createKey: &comparefakes.FakeComparer{
+			comparers: compare.ComparerSet{
+				CreateComparer: &comparefakes.FakeComparer{
 					CompareReturns: true,
 				},
 			},
@@ -46,8 +46,8 @@ func TestRunCompare(t *testing.T) {
 			expected: 0,
 		},
 		"create returns false with non-create resource": {
-			comparers: map[string]compare.Comparer{
-				createKey: &comparefakes.FakeComparer{
+			comparers: compare.ComparerSet{
+				CreateComparer: &comparefakes.FakeComparer{
 					CompareReturns: false,
 				},
 			},
@@ -60,8 +60,8 @@ func TestRunCompare(t *testing.T) {
 			expected: 0,
 		},
 		"create returns true with multiple resources": {
-			comparers: map[string]compare.Comparer{
-				createKey: &comparefakes.FakeComparer{
+			comparers: compare.ComparerSet{
+				CreateComparer: &comparefakes.FakeComparer{
 					CompareReturns: true,
 				},
 			},
@@ -80,11 +80,11 @@ func TestRunCompare(t *testing.T) {
 			expected: 0,
 		},
 		"fails if there is at least 1 failure": {
-			comparers: map[string]compare.Comparer{
-				createKey: &comparefakes.FakeComparer{
+			comparers: compare.ComparerSet{
+				CreateComparer: &comparefakes.FakeComparer{
 					CompareReturns: false,
 				},
-				destroyKey: &comparefakes.FakeComparer{
+				DestroyComparer: &comparefakes.FakeComparer{
 					CompareReturns: true,
 				},
 			},

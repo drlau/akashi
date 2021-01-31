@@ -11,12 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	createKey  = "create"
-	destroyKey = "destroy"
-	updateKey  = "update"
-)
-
 type DiffOptions struct {
 	File        string
 	JSON        bool
@@ -34,7 +28,7 @@ func NewCmdDiff() *cobra.Command {
 		Long:  `Validate "terraform plan" changes against a ruleset`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			comparers, err := compare.Comparers(args[0])
+			comparers, err := compare.NewComparerSet(args[0])
 			if err != nil {
 				return err
 			}
@@ -64,20 +58,20 @@ func NewCmdDiff() *cobra.Command {
 	return cmd
 }
 
-func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers map[string]compare.Comparer, opts *DiffOptions) int {
+func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers compare.ComparerSet, opts *DiffOptions) int {
 	exitCode := 0
-	createComparer, hasCreate := comparers[createKey]
-	destroyComparer, hasDestroy := comparers[destroyKey]
-	updateComparer, hasUpdate := comparers[updateKey]
+	createComparer := comparers.CreateComparer
+	destroyComparer := comparers.DestroyComparer
+	updateComparer := comparers.UpdateComparer
 
 	for _, r := range rc {
 		diff := ""
 		pass := true
-		if r.IsCreate() && hasCreate {
+		if r.IsCreate() && createComparer != nil {
 			diff, pass = createComparer.Diff(r)
-		} else if r.IsDelete() && hasDestroy {
+		} else if r.IsDelete() && destroyComparer != nil {
 			diff, pass = destroyComparer.Diff(r)
-		} else if r.IsUpdate() && hasUpdate {
+		} else if r.IsUpdate() && updateComparer != nil {
 			diff, pass = updateComparer.Diff(r)
 		} else {
 			if !opts.Strict {

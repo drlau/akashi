@@ -14,36 +14,34 @@ type Comparer interface {
 	Diff(plan.ResourcePlan) (string, bool)
 }
 
-const (
-	CreateKey  = "create"
-	DestroyKey = "destroy"
-	UpdateKey  = "update"
-)
+type ComparerSet struct {
+	CreateComparer  Comparer
+	DestroyComparer Comparer
+	UpdateComparer  Comparer
+}
 
-// TODO: re-arrange to make interface here
-
-func Comparers(path string) (map[string]Comparer, error) {
-	comparers := make(map[string]Comparer)
+func NewComparerSet(path string) (ComparerSet, error) {
+	result := ComparerSet{}
 	rulesetFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		return comparers, err
+		return result, err
 	}
 
 	var rs ruleset.Ruleset
 	err = yaml.Unmarshal(rulesetFile, &rs)
 	if err != nil {
-		return comparers, err
+		return result, err
 	}
 
 	if rs.CreatedResources != nil {
-		comparers[CreateKey] = compare.NewCreateComparer(*rs.CreatedResources)
+		result.CreateComparer = compare.NewCreateComparer(*rs.CreatedResources)
 	}
 	if rs.DestroyedResources != nil {
-		comparers[DestroyKey] = compare.NewDestroyComparer(*rs.DestroyedResources)
+		result.DestroyComparer = compare.NewDestroyComparer(*rs.DestroyedResources)
 	}
 	if rs.UpdatedResources != nil {
-		comparers[UpdateKey] = compare.NewUpdateComparer(*rs.UpdatedResources)
+		result.UpdateComparer = compare.NewUpdateComparer(*rs.UpdatedResources)
 	}
 
-	return comparers, nil
+	return result, nil
 }
