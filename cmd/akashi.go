@@ -3,27 +3,19 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v2"
 
-	"github.com/drlau/akashi/pkg/compare"
+	"github.com/drlau/akashi/internal/compare"
+	comparecmd "github.com/drlau/akashi/pkg/cmd/compare"
+	diffcmd "github.com/drlau/akashi/pkg/cmd/diff"
+	versioncmd "github.com/drlau/akashi/pkg/cmd/version"
 	"github.com/drlau/akashi/pkg/plan"
-	"github.com/drlau/akashi/pkg/ruleset"
 	"github.com/drlau/akashi/pkg/utils"
 )
 
-const (
-	createKey  = "create"
-	destroyKey = "destroy"
-	updateKey  = "update"
-)
-
-var (
-	version = "dev"
-)
+var version = "dev"
 
 var (
 	file          string
@@ -38,7 +30,7 @@ var (
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "akashi <path to ruleset>",
+		Use:          "akashi <command> <path to ruleset>",
 		Short:        "Akashi / 証",
 		Long:         `Validate "terraform plan" changes against a customizable ruleset`,
 		Args:         cobra.ExactArgs(1),
@@ -58,89 +50,50 @@ func NewCommand() *cobra.Command {
 	// TODO
 	// cmd.Flags().BoolVarP(&verbose, "verbose", "V", false, "enable verbose output")
 
-	versionCmd := &cobra.Command{
-		Use:    "version",
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(version)
-		},
-	}
-	cmd.AddCommand(versionCmd)
+	cmd.AddCommand(comparecmd.NewCmdCompare())
+	cmd.AddCommand(diffcmd.NewCmdDiff())
+	cmd.AddCommand(versioncmd.NewCmdVersion(os.Stdout, version))
 
 	return cmd
 }
 
 func run(_ *cobra.Command, args []string) error {
-	rulesetFile, err := ioutil.ReadFile(args[0])
+	comparers, err := compare.NewComparerSet(args[0])
 	if err != nil {
 		return err
 	}
 
-	var rs ruleset.Ruleset
-	err = yaml.Unmarshal(rulesetFile, &rs)
+	in, err := plan.NewResourcePlans(file, json)
 	if err != nil {
 		return err
-	}
-
-	var in []plan.ResourceChange
-	var data io.Reader
-
-	if file != "" {
-		data, err = os.Open(file)
-		if err != nil {
-			return err
-		}
-	} else {
-		data = os.Stdin
-	}
-
-	if json {
-		in, err = plan.NewResourcePlanFromJSON(data)
-		if err != nil {
-			return err
-		}
-	} else {
-		in, err = plan.NewResourcePlanFromPlanOutput(data)
-		if err != nil {
-			return err
-		}
-	}
-
-	comparers := make(map[string]compare.Comparer)
-	if rs.CreatedResources != nil {
-		comparers[createKey] = compare.NewCreateComparer(*rs.CreatedResources)
-	}
-	if rs.DestroyedResources != nil {
-		comparers[destroyKey] = compare.NewDestroyComparer(*rs.DestroyedResources)
-	}
-	if rs.UpdatedResources != nil {
-		comparers[updateKey] = compare.NewUpdateComparer(*rs.UpdatedResources)
 	}
 
 	if quiet {
+		fmt.Fprintln(os.Stderr, `[WARN] -q is deprecated. Please run "akashi compare" instead.`)
 		os.Exit(runCompare(in, comparers))
 	}
 	out := utils.NewOutput(noColor)
 
+	fmt.Fprintln(os.Stderr, `[WARN] no command is deprecated. Please run "akashi diff" instead.`)
 	os.Exit(runDiff(out, in, comparers))
 	return nil
 }
 
-func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
-	createComparer, hasCreate := comparers[createKey]
-	destroyComparer, hasDestroy := comparers[destroyKey]
-	updateComparer, hasUpdate := comparers[updateKey]
+func runCompare(rc []plan.ResourcePlan, comparers compare.ComparerSet) int {
+	createComparer := comparers.CreateComparer
+	destroyComparer := comparers.DestroyComparer
+	updateComparer := comparers.UpdateComparer
 
 	for _, r := range rc {
-		if r.IsCreate() && hasCreate {
+		if r.IsCreate() && createComparer != nil {
 			if !createComparer.Compare(r) {
 				return 1
 			}
-		} else if r.IsDelete() && hasDestroy {
+		} else if r.IsDelete() && destroyComparer != nil {
 			if !destroyComparer.Compare(r) {
 				return 1
 			}
-		} else if r.IsUpdate() && hasUpdate {
+		} else if r.IsUpdate() && updateComparer != nil {
 			if !updateComparer.Compare(r) {
 				return 1
 			}
@@ -152,20 +105,20 @@ func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer)
 	return 0
 }
 
-func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
+func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers compare.ComparerSet) int {
 	exitCode := 0
-	createComparer, hasCreate := comparers[createKey]
-	destroyComparer, hasDestroy := comparers[destroyKey]
-	updateComparer, hasUpdate := comparers[updateKey]
+	createComparer := comparers.CreateComparer
+	destroyComparer := comparers.DestroyComparer
+	updateComparer := comparers.UpdateComparer
 
 	for _, r := range rc {
 		diff := ""
 		pass := true
-		if r.IsCreate() && hasCreate {
+		if r.IsCreate() && createComparer != nil {
 			diff, pass = createComparer.Diff(r)
-		} else if r.IsDelete() && hasDestroy {
+		} else if r.IsDelete() && destroyComparer != nil {
 			diff, pass = destroyComparer.Diff(r)
-		} else if r.IsUpdate() && hasUpdate {
+		} else if r.IsUpdate() && updateComparer != nil {
 			diff, pass = updateComparer.Diff(r)
 		} else {
 			if !strict {

@@ -1,4 +1,4 @@
-package cmd
+package diff
 
 import (
 	"bytes"
@@ -11,118 +11,11 @@ import (
 	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
 )
 
-func TestRunCompare(t *testing.T) {
-	cases := map[string]struct {
-		comparers      compare.ComparerSet
-		resourceChange []plan.ResourcePlan
-		expected       int
-	}{
-		"create returns false with create resource": {
-			comparers: compare.ComparerSet{
-				CreateComparer: &comparefakes.FakeComparer{
-					CompareReturns: false,
-				},
-			},
-			resourceChange: []plan.ResourcePlan{
-				&planfakes.FakeResourcePlan{
-					CreateReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-			},
-			expected: 1,
-		},
-		"create returns true with create resource": {
-			comparers: compare.ComparerSet{
-				CreateComparer: &comparefakes.FakeComparer{
-					CompareReturns: true,
-				},
-			},
-			resourceChange: []plan.ResourcePlan{
-				&planfakes.FakeResourcePlan{
-					CreateReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-			},
-			expected: 0,
-		},
-		"create returns false with non-create resource": {
-			comparers: compare.ComparerSet{
-				CreateComparer: &comparefakes.FakeComparer{
-					CompareReturns: false,
-				},
-			},
-			resourceChange: []plan.ResourcePlan{
-				&planfakes.FakeResourcePlan{
-					NameReturns: "name",
-					TypeReturns: "type",
-				},
-			},
-			expected: 0,
-		},
-		"create returns true with multiple resources": {
-			comparers: compare.ComparerSet{
-				CreateComparer: &comparefakes.FakeComparer{
-					CompareReturns: true,
-				},
-			},
-			resourceChange: []plan.ResourcePlan{
-				&planfakes.FakeResourcePlan{
-					CreateReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-				&planfakes.FakeResourcePlan{
-					CreateReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-			},
-			expected: 0,
-		},
-		"fails if there is at least 1 failure": {
-			comparers: compare.ComparerSet{
-				CreateComparer: &comparefakes.FakeComparer{
-					CompareReturns: false,
-				},
-				DestroyComparer: &comparefakes.FakeComparer{
-					CompareReturns: true,
-				},
-			},
-			resourceChange: []plan.ResourcePlan{
-				&planfakes.FakeResourcePlan{
-					CreateReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-				&planfakes.FakeResourcePlan{
-					DeleteReturns: true,
-					NameReturns:   "name",
-					TypeReturns:   "type",
-				},
-			},
-			expected: 1,
-		},
-		// TODO: test case to ensure comparers are called correctly(matching type and number of calls)
-	}
-
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			if got := runCompare(tc.resourceChange, tc.comparers); got != tc.expected {
-				t.Errorf("Expected: %v but got %v", tc.expected, got)
-			}
-		})
-	}
-}
-
-// TODO: there must be a better way to do pre and post hooks
-// ginkgo comes to mind
 func TestRunDiff(t *testing.T) {
 	cases := map[string]struct {
 		comparers      compare.ComparerSet
-		resourceChange []plan.ResourcePlan
-		preHook        func()
+		resourcePlan   []plan.ResourcePlan
+		opts           *DiffOptions
 		expected       int
 		expectedOutput []string
 	}{
@@ -133,7 +26,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer fail",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address",
@@ -141,6 +34,7 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
+			opts:           &DiffOptions{},
 			expected:       0,
 			expectedOutput: []string{"comparer fail"},
 		},
@@ -151,7 +45,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address",
@@ -159,6 +53,7 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
+			opts:           &DiffOptions{},
 			expected:       0,
 			expectedOutput: []string{"comparer ok"},
 		},
@@ -168,13 +63,14 @@ func TestRunDiff(t *testing.T) {
 					DiffReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					AddressReturns: "address",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
 			},
+			opts:           &DiffOptions{},
 			expected:       0,
 			expectedOutput: []string{""},
 		},
@@ -185,15 +81,15 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer fail",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					AddressReturns: "address",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
 			},
-			preHook: func() {
-				strict = true
+			opts: &DiffOptions{
+				Strict: true,
 			},
 			expected:       0,
 			expectedOutput: []string{"?", "address (no matching comparer)"},
@@ -205,7 +101,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
@@ -219,6 +115,7 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
+			opts:           &DiffOptions{},
 			expected:       0,
 			expectedOutput: []string{"comparer ok\ncomparer ok"},
 		},
@@ -233,7 +130,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
@@ -247,6 +144,7 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
+			opts:           &DiffOptions{},
 			expected:       0,
 			expectedOutput: []string{"comparer fail", "comparer ok"},
 		},
@@ -261,7 +159,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
@@ -275,8 +173,8 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
-			preHook: func() {
-				errorOnFail = true
+			opts: &DiffOptions{
+				ErrorOnFail: true,
 			},
 			expected:       1,
 			expectedOutput: []string{"comparer fail", "comparer ok"},
@@ -292,7 +190,7 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourcePlan{
+			resourcePlan: []plan.ResourcePlan{
 				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
@@ -306,8 +204,8 @@ func TestRunDiff(t *testing.T) {
 					TypeReturns:    "type",
 				},
 			},
-			preHook: func() {
-				failedOnly = true
+			opts: &DiffOptions{
+				FailedOnly: true,
 			},
 			expected:       0,
 			expectedOutput: []string{"comparer fail"},
@@ -317,17 +215,8 @@ func TestRunDiff(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			// set default vars
-			errorOnFail = false
-			strict = false
-			failedOnly = false
-
-			if tc.preHook != nil {
-				tc.preHook()
-			}
-
 			var output bytes.Buffer
-			if got := runDiff(&output, tc.resourceChange, tc.comparers); got != tc.expected {
+			if got := runDiff(&output, tc.resourcePlan, tc.comparers, tc.opts); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
 

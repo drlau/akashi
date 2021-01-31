@@ -1,8 +1,6 @@
 package plan
 
 import (
-	"io"
-
 	"github.com/drlau/tfplanparse"
 )
 
@@ -10,22 +8,7 @@ type tfPlanChange struct {
 	ResourceChange *tfplanparse.ResourceChange
 }
 
-func NewResourcePlanFromPlanOutput(in io.Reader) ([]ResourceChange, error) {
-	var result []ResourceChange
-
-	parsed, err := tfplanparse.Parse(in)
-	if err != nil {
-		return result, err
-	}
-
-	for _, rc := range parsed {
-		result = append(result, newTFPlanChange(rc))
-	}
-
-	return result, nil
-}
-
-func newTFPlanChange(rc *tfplanparse.ResourceChange) ResourceChange {
+func NewTFPlanChange(rc *tfplanparse.ResourceChange) *tfPlanChange {
 	return &tfPlanChange{
 		ResourceChange: rc,
 	}

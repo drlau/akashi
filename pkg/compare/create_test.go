@@ -4,28 +4,26 @@ import (
 	"strings"
 	"testing"
 
+	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
+	planfakes "github.com/drlau/akashi/pkg/compare/fakes"
 	"github.com/drlau/akashi/pkg/plan"
-	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
-	resourcefakes "github.com/drlau/akashi/pkg/resource/fakes"
 )
 
 func TestCreateCompare(t *testing.T) {
 	cases := map[string]struct {
-		comparer       *CreateComparer
-		resourceChange plan.ResourceChange
-		expected       bool
+		comparer     *CreateComparer
+		resourcePlan plan.ResourcePlan
+		expected     bool
 	}{
 		"matching nametype resource": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: true,
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						CompareReturns: true,
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -33,15 +31,13 @@ func TestCreateCompare(t *testing.T) {
 		},
 		"matching nametype resource returning false": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: false,
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						CompareReturns: false,
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -49,15 +45,13 @@ func TestCreateCompare(t *testing.T) {
 		},
 		"matching name resource": {
 			comparer: &CreateComparer{
-				NameResources: map[string]resourceWithOpts{
-					"name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: true,
-						},
+				NameResources: map[string]Resource{
+					"name": &comparefakes.FakeResource{
+						CompareReturns: true,
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -65,15 +59,13 @@ func TestCreateCompare(t *testing.T) {
 		},
 		"matching type resource": {
 			comparer: &CreateComparer{
-				TypeResources: map[string]resourceWithOpts{
-					"type": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: true,
-						},
+				TypeResources: map[string]Resource{
+					"type": &comparefakes.FakeResource{
+						CompareReturns: true,
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -81,29 +73,23 @@ func TestCreateCompare(t *testing.T) {
 		},
 		"prioritizes matching nametype resource": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: true,
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						CompareReturns: true,
 					},
 				},
-				NameResources: map[string]resourceWithOpts{
-					"name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: false,
-						},
+				NameResources: map[string]Resource{
+					"name": &comparefakes.FakeResource{
+						CompareReturns: false,
 					},
 				},
-				TypeResources: map[string]resourceWithOpts{
-					"type": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							CompareReturns: false,
-						},
+				TypeResources: map[string]Resource{
+					"type": &comparefakes.FakeResource{
+						CompareReturns: false,
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -111,7 +97,7 @@ func TestCreateCompare(t *testing.T) {
 		},
 		"no matching resource": {
 			comparer: &CreateComparer{},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -121,7 +107,7 @@ func TestCreateCompare(t *testing.T) {
 			comparer: &CreateComparer{
 				Strict: true,
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -131,7 +117,7 @@ func TestCreateCompare(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.comparer.Compare(tc.resourceChange); got != tc.expected {
+			if got := tc.comparer.Compare(tc.resourcePlan); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
 		})
@@ -141,21 +127,19 @@ func TestCreateCompare(t *testing.T) {
 func TestCreateDiff(t *testing.T) {
 	cases := map[string]struct {
 		comparer       *CreateComparer
-		resourceChange plan.ResourceChange
+		resourcePlan   plan.ResourcePlan
 		expected       bool
 		expectedOutput []string
 	}{
 		"matching nametype resource": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "",
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						DiffReturns: "",
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -165,15 +149,13 @@ func TestCreateDiff(t *testing.T) {
 		},
 		"matching nametype resource returning false": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "failed",
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						DiffReturns: "failed",
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -183,15 +165,13 @@ func TestCreateDiff(t *testing.T) {
 		},
 		"matching name resource": {
 			comparer: &CreateComparer{
-				NameResources: map[string]resourceWithOpts{
-					"name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "",
-						},
+				NameResources: map[string]Resource{
+					"name": &comparefakes.FakeResource{
+						DiffReturns: "",
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -201,15 +181,13 @@ func TestCreateDiff(t *testing.T) {
 		},
 		"matching type resource": {
 			comparer: &CreateComparer{
-				TypeResources: map[string]resourceWithOpts{
-					"type": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "",
-						},
+				TypeResources: map[string]Resource{
+					"type": &comparefakes.FakeResource{
+						DiffReturns: "",
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -219,29 +197,23 @@ func TestCreateDiff(t *testing.T) {
 		},
 		"prioritizes matching nametype resource": {
 			comparer: &CreateComparer{
-				NameTypeResources: map[string]resourceWithOpts{
-					"type.name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "",
-						},
+				NameTypeResources: map[string]Resource{
+					"type.name": &comparefakes.FakeResource{
+						DiffReturns: "",
 					},
 				},
-				NameResources: map[string]resourceWithOpts{
-					"name": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "failed",
-						},
+				NameResources: map[string]Resource{
+					"name": &comparefakes.FakeResource{
+						DiffReturns: "failed",
 					},
 				},
-				TypeResources: map[string]resourceWithOpts{
-					"type": resourceWithOpts{
-						resource: &resourcefakes.FakeResource{
-							DiffReturns: "failed",
-						},
+				TypeResources: map[string]Resource{
+					"type": &comparefakes.FakeResource{
+						DiffReturns: "failed",
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -251,7 +223,7 @@ func TestCreateDiff(t *testing.T) {
 		},
 		"no matching resource": {
 			comparer: &CreateComparer{},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -263,7 +235,7 @@ func TestCreateDiff(t *testing.T) {
 			comparer: &CreateComparer{
 				Strict: true,
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -275,7 +247,7 @@ func TestCreateDiff(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			output, got := tc.comparer.Diff(tc.resourceChange)
+			output, got := tc.comparer.Diff(tc.resourcePlan)
 			if got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}

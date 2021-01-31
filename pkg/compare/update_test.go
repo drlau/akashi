@@ -4,30 +4,28 @@ import (
 	"strings"
 	"testing"
 
+	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
+	planfakes "github.com/drlau/akashi/pkg/compare/fakes"
 	"github.com/drlau/akashi/pkg/plan"
-	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
-	resourcefakes "github.com/drlau/akashi/pkg/resource/fakes"
 )
 
 func TestUpdateCompare(t *testing.T) {
 	cases := map[string]struct {
-		comparer       *UpdateComparer
-		resourceChange plan.ResourceChange
-		expected       bool
+		comparer     *UpdateComparer
+		resourcePlan plan.ResourcePlan
+		expected     bool
 	}{
 		"matching nametype resource with before only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -36,16 +34,14 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with after only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type.name": {
+						After: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -54,21 +50,17 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+						After: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -77,21 +69,17 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with passing before and failing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+						After: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -100,21 +88,17 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with failing before and passing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+						After: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -123,21 +107,17 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with failing before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+						After: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -146,16 +126,14 @@ func TestUpdateCompare(t *testing.T) {
 		"matching name resource": {
 			comparer: &UpdateComparer{
 				NameResources: map[string]updateResource{
-					"name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -164,16 +142,14 @@ func TestUpdateCompare(t *testing.T) {
 		"matching type resource": {
 			comparer: &UpdateComparer{
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -182,34 +158,28 @@ func TestUpdateCompare(t *testing.T) {
 		"prioritizes matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: true,
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: true,
 						},
 					},
 				},
 				NameResources: map[string]updateResource{
-					"name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+					"name": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
 					},
 				},
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								CompareReturns: false,
-							},
+					"type": {
+						Before: &comparefakes.FakeResource{
+							CompareReturns: false,
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -217,7 +187,7 @@ func TestUpdateCompare(t *testing.T) {
 		},
 		"no matching resource": {
 			comparer: &UpdateComparer{},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -227,7 +197,7 @@ func TestUpdateCompare(t *testing.T) {
 			comparer: &UpdateComparer{
 				Strict: true,
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				NameReturns: "name",
 				TypeReturns: "type",
 			},
@@ -237,7 +207,7 @@ func TestUpdateCompare(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.comparer.Compare(tc.resourceChange); got != tc.expected {
+			if got := tc.comparer.Compare(tc.resourcePlan); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
 		})
@@ -247,23 +217,21 @@ func TestUpdateCompare(t *testing.T) {
 func TestUpdateDiff(t *testing.T) {
 	cases := map[string]struct {
 		comparer       *UpdateComparer
-		resourceChange plan.ResourceChange
+		resourcePlan   plan.ResourcePlan
 		expected       bool
 		expectedOutput []string
 	}{
 		"matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -274,16 +242,14 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with after only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type.name": {
+						After: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -294,21 +260,17 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+						After: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -319,21 +281,17 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with passing before and failing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedAfter",
-							},
+						After: &comparefakes.FakeResource{
+							DiffReturns: "failedAfter",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -344,21 +302,17 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with failing before and passing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedBefore",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "failedBefore",
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+						After: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -369,21 +323,17 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with failing before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedBefore",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "failedBefore",
 						},
-						After: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedAfter",
-							},
+						After: &comparefakes.FakeResource{
+							DiffReturns: "failedAfter",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -394,16 +344,14 @@ func TestUpdateDiff(t *testing.T) {
 		"matching name resource": {
 			comparer: &UpdateComparer{
 				NameResources: map[string]updateResource{
-					"name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -414,16 +362,14 @@ func TestUpdateDiff(t *testing.T) {
 		"matching type resource": {
 			comparer: &UpdateComparer{
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -434,34 +380,28 @@ func TestUpdateDiff(t *testing.T) {
 		"prioritizes matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "",
-							},
+					"type.name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "",
 						},
 					},
 				},
 				NameResources: map[string]updateResource{
-					"name": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedName",
-							},
+					"name": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "failedName",
 						},
 					},
 				},
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
-						Before: &resourceWithOpts{
-							resource: &resourcefakes.FakeResource{
-								DiffReturns: "failedType",
-							},
+					"type": {
+						Before: &comparefakes.FakeResource{
+							DiffReturns: "failedType",
 						},
 					},
 				},
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -471,7 +411,7 @@ func TestUpdateDiff(t *testing.T) {
 		},
 		"no matching resource": {
 			comparer: &UpdateComparer{},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -483,7 +423,7 @@ func TestUpdateDiff(t *testing.T) {
 			comparer: &UpdateComparer{
 				Strict: true,
 			},
-			resourceChange: &planfakes.FakeResourceChange{
+			resourcePlan: &planfakes.FakeResourcePlan{
 				AddressReturns: "address",
 				NameReturns:    "name",
 				TypeReturns:    "type",
@@ -495,7 +435,7 @@ func TestUpdateDiff(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			output, got := tc.comparer.Diff(tc.resourceChange)
+			output, got := tc.comparer.Diff(tc.resourcePlan)
 			if got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
