@@ -15,15 +15,7 @@ import (
 	"github.com/drlau/akashi/pkg/utils"
 )
 
-const (
-	createKey  = "create"
-	destroyKey = "destroy"
-	updateKey  = "update"
-)
-
-var (
-	version = "dev"
-)
+var version = "dev"
 
 var (
 	file          string
@@ -66,7 +58,7 @@ func NewCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, args []string) error {
-	comparers, err := compare.Comparers(args[0])
+	comparers, err := compare.NewComparerSet(args[0])
 	if err != nil {
 		return err
 	}
@@ -87,21 +79,21 @@ func run(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func runCompare(rc []plan.ResourcePlan, comparers map[string]compare.Comparer) int {
-	createComparer, hasCreate := comparers[createKey]
-	destroyComparer, hasDestroy := comparers[destroyKey]
-	updateComparer, hasUpdate := comparers[updateKey]
+func runCompare(rc []plan.ResourcePlan, comparers compare.ComparerSet) int {
+	createComparer := comparers.CreateComparer
+	destroyComparer := comparers.DestroyComparer
+	updateComparer := comparers.UpdateComparer
 
 	for _, r := range rc {
-		if r.IsCreate() && hasCreate {
+		if r.IsCreate() && createComparer != nil {
 			if !createComparer.Compare(r) {
 				return 1
 			}
-		} else if r.IsDelete() && hasDestroy {
+		} else if r.IsDelete() && destroyComparer != nil {
 			if !destroyComparer.Compare(r) {
 				return 1
 			}
-		} else if r.IsUpdate() && hasUpdate {
+		} else if r.IsUpdate() && updateComparer != nil {
 			if !updateComparer.Compare(r) {
 				return 1
 			}
@@ -113,20 +105,20 @@ func runCompare(rc []plan.ResourcePlan, comparers map[string]compare.Comparer) i
 	return 0
 }
 
-func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers map[string]compare.Comparer) int {
+func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers compare.ComparerSet) int {
 	exitCode := 0
-	createComparer, hasCreate := comparers[createKey]
-	destroyComparer, hasDestroy := comparers[destroyKey]
-	updateComparer, hasUpdate := comparers[updateKey]
+	createComparer := comparers.CreateComparer
+	destroyComparer := comparers.DestroyComparer
+	updateComparer := comparers.UpdateComparer
 
 	for _, r := range rc {
 		diff := ""
 		pass := true
-		if r.IsCreate() && hasCreate {
+		if r.IsCreate() && createComparer != nil {
 			diff, pass = createComparer.Diff(r)
-		} else if r.IsDelete() && hasDestroy {
+		} else if r.IsDelete() && destroyComparer != nil {
 			diff, pass = destroyComparer.Diff(r)
-		} else if r.IsUpdate() && hasUpdate {
+		} else if r.IsUpdate() && updateComparer != nil {
 			diff, pass = updateComparer.Diff(r)
 		} else {
 			if !strict {

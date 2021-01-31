@@ -18,7 +18,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with before only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -34,7 +34,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with after only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						After: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -50,7 +50,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -69,7 +69,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with passing before and failing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -88,7 +88,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with failing before and passing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: false,
 						},
@@ -107,7 +107,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching nametype resource with failing before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: false,
 						},
@@ -126,7 +126,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching name resource": {
 			comparer: &UpdateComparer{
 				NameResources: map[string]updateResource{
-					"name": updateResource{
+					"name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -142,7 +142,7 @@ func TestUpdateCompare(t *testing.T) {
 		"matching type resource": {
 			comparer: &UpdateComparer{
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
+					"type": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
@@ -158,21 +158,21 @@ func TestUpdateCompare(t *testing.T) {
 		"prioritizes matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: true,
 						},
 					},
 				},
 				NameResources: map[string]updateResource{
-					"name": updateResource{
+					"name": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: false,
 						},
 					},
 				},
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
+					"type": {
 						Before: &comparefakes.FakeResource{
 							CompareReturns: false,
 						},
@@ -224,7 +224,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -242,7 +242,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with after only": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						After: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -260,7 +260,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -281,7 +281,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with passing before and failing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -302,7 +302,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with failing before and passing after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "failedBefore",
 						},
@@ -323,7 +323,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching nametype resource with failing before and after": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "failedBefore",
 						},
@@ -344,7 +344,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching name resource": {
 			comparer: &UpdateComparer{
 				NameResources: map[string]updateResource{
-					"name": updateResource{
+					"name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -362,7 +362,7 @@ func TestUpdateDiff(t *testing.T) {
 		"matching type resource": {
 			comparer: &UpdateComparer{
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
+					"type": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
@@ -380,21 +380,21 @@ func TestUpdateDiff(t *testing.T) {
 		"prioritizes matching nametype resource": {
 			comparer: &UpdateComparer{
 				NameTypeResources: map[string]updateResource{
-					"type.name": updateResource{
+					"type.name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "",
 						},
 					},
 				},
 				NameResources: map[string]updateResource{
-					"name": updateResource{
+					"name": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "failedName",
 						},
 					},
 				},
 				TypeResources: map[string]updateResource{
-					"type": updateResource{
+					"type": {
 						Before: &comparefakes.FakeResource{
 							DiffReturns: "failedType",
 						},

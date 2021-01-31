@@ -148,22 +148,22 @@ func (r *resource) Diff(rv ResourceValues) string {
 
 	if r.CompareOptions.EnforceAll && len(cmp.MissingEnforced) > 0 {
 		buf.WriteString(utils.Red("Missing enforced arguments:\n"))
-		for arg, _ := range cmp.MissingEnforced {
+		for arg := range cmp.MissingEnforced {
 			buf.WriteString(utils.Red(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
 	if !r.CompareOptions.IgnoreExtraArgs && len(cmp.Extra) != 0 {
 		buf.WriteString(utils.Yellow("Extra arguments:\n"))
-		for arg, _ := range cmp.Extra {
+		for arg := range cmp.Extra {
 			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
 	if r.CompareOptions.RequireAll && (len(cmp.MissingEnforced)+len(cmp.MissingIgnored)) != 0 {
 		buf.WriteString(utils.Yellow("Missing enforced and ignored arguments:\n"))
-		for arg, _ := range cmp.MissingEnforced {
+		for arg := range cmp.MissingEnforced {
 			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
-		for arg, _ := range cmp.MissingIgnored {
+		for arg := range cmp.MissingIgnored {
 			buf.WriteString(utils.Yellow(fmt.Sprintf("  - %v\n", arg)))
 		}
 	}
