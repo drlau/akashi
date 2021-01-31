@@ -3,16 +3,17 @@ package compare
 import (
 	"testing"
 
-	"github.com/drlau/akashi/pkg/compare"
-	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
+	"github.com/drlau/akashi/internal/compare"
+	comparefakes "github.com/drlau/akashi/internal/compare/fakes"
 	"github.com/drlau/akashi/pkg/plan"
+	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
 )
 
 func TestRunCompare(t *testing.T) {
 	cases := map[string]struct {
-		comparers      map[string]compare.Comparer
-		resourceChange []plan.ResourceChange
-		expected       int
+		comparers    map[string]compare.Comparer
+		resourcePlan []plan.ResourcePlan
+		expected     int
 	}{
 		"create returns false with create resource": {
 			comparers: map[string]compare.Comparer{
@@ -20,8 +21,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourcePlan: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -35,8 +36,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourcePlan: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -50,8 +51,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourcePlan: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					NameReturns: "name",
 					TypeReturns: "type",
 				},
@@ -64,13 +65,13 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourcePlan: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -87,13 +88,13 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourcePlan: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					DeleteReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -106,7 +107,7 @@ func TestRunCompare(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := runCompare(tc.resourceChange, tc.comparers, false); got != tc.expected {
+			if got := runCompare(tc.resourcePlan, tc.comparers, false); got != tc.expected {
 				t.Errorf("Expected: %v but got %v", tc.expected, got)
 			}
 		})

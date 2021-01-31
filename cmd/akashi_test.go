@@ -5,15 +5,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/drlau/akashi/pkg/compare"
-	comparefakes "github.com/drlau/akashi/pkg/compare/fakes"
+	"github.com/drlau/akashi/internal/compare"
+	comparefakes "github.com/drlau/akashi/internal/compare/fakes"
 	"github.com/drlau/akashi/pkg/plan"
+	planfakes "github.com/drlau/akashi/pkg/plan/fakes"
 )
 
 func TestRunCompare(t *testing.T) {
 	cases := map[string]struct {
 		comparers      map[string]compare.Comparer
-		resourceChange []plan.ResourceChange
+		resourceChange []plan.ResourcePlan
 		expected       int
 	}{
 		"create returns false with create resource": {
@@ -22,8 +23,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -37,8 +38,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -52,8 +53,8 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					NameReturns: "name",
 					TypeReturns: "type",
 				},
@@ -66,13 +67,13 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -89,13 +90,13 @@ func TestRunCompare(t *testing.T) {
 					CompareReturns: true,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					DeleteReturns: true,
 					NameReturns:   "name",
 					TypeReturns:   "type",
@@ -120,7 +121,7 @@ func TestRunCompare(t *testing.T) {
 func TestRunDiff(t *testing.T) {
 	cases := map[string]struct {
 		comparers      map[string]compare.Comparer
-		resourceChange []plan.ResourceChange
+		resourceChange []plan.ResourcePlan
 		preHook        func()
 		expected       int
 		expectedOutput []string
@@ -132,8 +133,8 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer fail",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address",
 					NameReturns:    "name",
@@ -150,8 +151,8 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address",
 					NameReturns:    "name",
@@ -167,8 +168,8 @@ func TestRunDiff(t *testing.T) {
 					DiffReturns: false,
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					AddressReturns: "address",
 					NameReturns:    "name",
 					TypeReturns:    "type",
@@ -184,8 +185,8 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer fail",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					AddressReturns: "address",
 					NameReturns:    "name",
 					TypeReturns:    "type",
@@ -204,14 +205,14 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address2",
 					NameReturns:    "name",
@@ -232,14 +233,14 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					DeleteReturns:  true,
 					AddressReturns: "address2",
 					NameReturns:    "name",
@@ -260,14 +261,14 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					DeleteReturns:  true,
 					AddressReturns: "address2",
 					NameReturns:    "name",
@@ -291,14 +292,14 @@ func TestRunDiff(t *testing.T) {
 					DiffOutput:  "comparer ok",
 				},
 			},
-			resourceChange: []plan.ResourceChange{
-				&comparefakes.FakeResourceChange{
+			resourceChange: []plan.ResourcePlan{
+				&planfakes.FakeResourcePlan{
 					CreateReturns:  true,
 					AddressReturns: "address1",
 					NameReturns:    "name",
 					TypeReturns:    "type",
 				},
-				&comparefakes.FakeResourceChange{
+				&planfakes.FakeResourcePlan{
 					DeleteReturns:  true,
 					AddressReturns: "address2",
 					NameReturns:    "name",

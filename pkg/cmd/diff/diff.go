@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/drlau/akashi/internal/factory"
-	"github.com/drlau/akashi/pkg/compare"
+	"github.com/drlau/akashi/internal/compare"
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/utils"
 
@@ -35,12 +34,12 @@ func NewCmdDiff() *cobra.Command {
 		Long:  `Validate "terraform plan" changes against a ruleset`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			comparers, err := factory.Comparers(args[0])
+			comparers, err := compare.Comparers(args[0])
 			if err != nil {
 				return err
 			}
 
-			plan, err := factory.ResourcePlans(opts.File, opts.JSON)
+			plan, err := plan.NewResourcePlans(opts.File, opts.JSON)
 			if err != nil {
 				return err
 			}
@@ -65,7 +64,7 @@ func NewCmdDiff() *cobra.Command {
 	return cmd
 }
 
-func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compare.Comparer, opts *DiffOptions) int {
+func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers map[string]compare.Comparer, opts *DiffOptions) int {
 	exitCode := 0
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]

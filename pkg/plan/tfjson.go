@@ -1,9 +1,6 @@
 package plan
 
 import (
-	"io"
-	"io/ioutil"
-
 	"github.com/hashicorp/terraform-json"
 )
 
@@ -11,28 +8,7 @@ type jsonPlanChange struct {
 	ResourceChange *tfjson.ResourceChange
 }
 
-func NewResourcePlanFromJSON(in io.Reader) ([]ResourceChange, error) {
-	var result []ResourceChange
-
-	parsed := &tfjson.Plan{}
-	data, err := ioutil.ReadAll(in)
-	if err != nil {
-		return result, err
-	}
-
-	err = parsed.UnmarshalJSON(data)
-	if err != nil {
-		return result, err
-	}
-
-	for _, rc := range parsed.ResourceChanges {
-		result = append(result, newJSONPlanChange(rc))
-	}
-
-	return result, nil
-}
-
-func newJSONPlanChange(json *tfjson.ResourceChange) ResourceChange {
+func NewJSONPlanChange(json *tfjson.ResourceChange) *jsonPlanChange {
 	return &jsonPlanChange{
 		ResourceChange: json,
 	}

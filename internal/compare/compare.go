@@ -1,12 +1,18 @@
-package factory
+package compare
 
 import (
 	"io/ioutil"
 
 	"github.com/drlau/akashi/pkg/compare"
+	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/ruleset"
 	yaml "gopkg.in/yaml.v2"
 )
+
+type Comparer interface {
+	Compare(plan.ResourcePlan) bool
+	Diff(plan.ResourcePlan) (string, bool)
+}
 
 const (
 	CreateKey  = "create"
@@ -16,8 +22,8 @@ const (
 
 // TODO: re-arrange to make interface here
 
-func Comparers(path string) (map[string]compare.Comparer, error) {
-	comparers := make(map[string]compare.Comparer)
+func Comparers(path string) (map[string]Comparer, error) {
+	comparers := make(map[string]Comparer)
 	rulesetFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		return comparers, err

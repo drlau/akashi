@@ -56,7 +56,7 @@ func NewUpdateComparer(ruleset ruleset.UpdateResourceChanges) *UpdateComparer {
 	}
 }
 
-func (c *UpdateComparer) Compare(r plan.ResourceChange) bool {
+func (c *UpdateComparer) Compare(r plan.ResourcePlan) bool {
 	nameType := constructNameTypeKey(r)
 	beforeChanges := resource.ResourceValues{
 		Values:        r.GetBefore(),
@@ -101,7 +101,7 @@ func (c *UpdateComparer) Compare(r plan.ResourceChange) bool {
 	return !c.Strict
 }
 
-func (c *UpdateComparer) Diff(r plan.ResourceChange) (string, bool) {
+func (c *UpdateComparer) Diff(r plan.ResourcePlan) (string, bool) {
 	nameType := constructNameTypeKey(r)
 	// TODO: handle IgnoreNoOp
 	beforeChanges := resource.ResourceValues{

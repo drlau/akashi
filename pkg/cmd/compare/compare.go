@@ -3,8 +3,7 @@ package compare
 import (
 	"fmt"
 
-	"github.com/drlau/akashi/internal/factory"
-	"github.com/drlau/akashi/pkg/compare"
+	"github.com/drlau/akashi/internal/compare"
 	"github.com/drlau/akashi/pkg/plan"
 
 	"github.com/spf13/cobra"
@@ -30,18 +29,18 @@ func NewCmdCompare() *cobra.Command {
 		Long:  `Validate "terraform plan" changes against a ruleset, exiting with code 0 if ok`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			comparers, err := factory.Comparers(args[0])
+			comparers, err := compare.Comparers(args[0])
 			if err != nil {
 				return err
 			}
 
-			plan, err := factory.ResourcePlans(opts.File, opts.JSON)
+			plans, err := plan.NewResourcePlans(opts.File, opts.JSON)
 			if err != nil {
 				return err
 			}
 
 			cmd.SilenceErrors = true
-			if result := runCompare(plan, comparers, opts.Strict); result != 0 {
+			if result := runCompare(plans, comparers, opts.Strict); result != 0 {
 				return fmt.Errorf("compare failed")
 			}
 
@@ -56,7 +55,7 @@ func NewCmdCompare() *cobra.Command {
 	return cmd
 }
 
-func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer, strict bool) int {
+func runCompare(rc []plan.ResourcePlan, comparers map[string]compare.Comparer, strict bool) int {
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
 	updateComparer, hasUpdate := comparers[updateKey]

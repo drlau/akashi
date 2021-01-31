@@ -45,7 +45,7 @@ func NewCreateComparer(ruleset ruleset.CreateDeleteResourceChanges) *CreateCompa
 	}
 }
 
-func (c *CreateComparer) Compare(r plan.ResourceChange) bool {
+func (c *CreateComparer) Compare(r plan.ResourcePlan) bool {
 	nameType := constructNameTypeKey(r)
 	changes := resource.ResourceValues{
 		Values:   r.GetAfter(),
@@ -63,7 +63,7 @@ func (c *CreateComparer) Compare(r plan.ResourceChange) bool {
 	return !c.Strict
 }
 
-func (c *CreateComparer) Diff(r plan.ResourceChange) (string, bool) {
+func (c *CreateComparer) Diff(r plan.ResourcePlan) (string, bool) {
 	nameType := constructNameTypeKey(r)
 	changes := resource.ResourceValues{
 		Values:   r.GetAfter(),

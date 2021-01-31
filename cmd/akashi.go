@@ -3,18 +3,15 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v2"
 
+	"github.com/drlau/akashi/internal/compare"
 	comparecmd "github.com/drlau/akashi/pkg/cmd/compare"
 	diffcmd "github.com/drlau/akashi/pkg/cmd/diff"
 	versioncmd "github.com/drlau/akashi/pkg/cmd/version"
-	"github.com/drlau/akashi/pkg/compare"
 	"github.com/drlau/akashi/pkg/plan"
-	"github.com/drlau/akashi/pkg/ruleset"
 	"github.com/drlau/akashi/pkg/utils"
 )
 
@@ -69,50 +66,14 @@ func NewCommand() *cobra.Command {
 }
 
 func run(_ *cobra.Command, args []string) error {
-	rulesetFile, err := ioutil.ReadFile(args[0])
+	comparers, err := compare.Comparers(args[0])
 	if err != nil {
 		return err
 	}
 
-	var rs ruleset.Ruleset
-	err = yaml.Unmarshal(rulesetFile, &rs)
+	in, err := plan.NewResourcePlans(file, json)
 	if err != nil {
 		return err
-	}
-
-	var in []plan.ResourceChange
-	var data io.Reader
-
-	if file != "" {
-		data, err = os.Open(file)
-		if err != nil {
-			return err
-		}
-	} else {
-		data = os.Stdin
-	}
-
-	if json {
-		in, err = plan.NewResourcePlanFromJSON(data)
-		if err != nil {
-			return err
-		}
-	} else {
-		in, err = plan.NewResourcePlanFromPlanOutput(data)
-		if err != nil {
-			return err
-		}
-	}
-
-	comparers := make(map[string]compare.Comparer)
-	if rs.CreatedResources != nil {
-		comparers[createKey] = compare.NewCreateComparer(*rs.CreatedResources)
-	}
-	if rs.DestroyedResources != nil {
-		comparers[destroyKey] = compare.NewDestroyComparer(*rs.DestroyedResources)
-	}
-	if rs.UpdatedResources != nil {
-		comparers[updateKey] = compare.NewUpdateComparer(*rs.UpdatedResources)
 	}
 
 	if quiet {
@@ -126,7 +87,7 @@ func run(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
+func runCompare(rc []plan.ResourcePlan, comparers map[string]compare.Comparer) int {
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
 	updateComparer, hasUpdate := comparers[updateKey]
@@ -152,7 +113,7 @@ func runCompare(rc []plan.ResourceChange, comparers map[string]compare.Comparer)
 	return 0
 }
 
-func runDiff(out io.Writer, rc []plan.ResourceChange, comparers map[string]compare.Comparer) int {
+func runDiff(out io.Writer, rc []plan.ResourcePlan, comparers map[string]compare.Comparer) int {
 	exitCode := 0
 	createComparer, hasCreate := comparers[createKey]
 	destroyComparer, hasDestroy := comparers[destroyKey]
