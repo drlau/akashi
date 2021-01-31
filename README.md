@@ -32,29 +32,19 @@ go get -u github.com/drlau/akashi
 
 ```
 Usage:
-  akashi <path to ruleset> [flags]
-
-Flags:
-  -e, --error-on-fail   for non-quiet runs, make akashi return exit code 1 on fails
-      --failed-only     only output failing lines
-  -f, --file string     read plan output from file
-  -h, --help            help for akashi
-  -j, --json            read the contents as the output from 'terraform state show -json'
-      --no-color        disable color output
-  -q, --quiet           compare only, and error if there is a failing rule
-  -s, --strict          require all resources to match a comparer
+  akashi <compare | diff> <path to ruleset> [flags]
 ```
 
 By default, `akashi` will read a `terraform plan` output from `stdin`, so you should pipe the result of `terraform plan`:
 
 ```bash
-terraform plan | akashi <path to ruleset>
+terraform plan | akashi <compare | diff> <path to ruleset>
 ```
 
 If you produced a plan output with `terraform plan -out=<file>`, `akashi` can parse it by specifying `--json`. Note that this file is encoded and needs to be decoded by `terraform` before `akashi` can parse it properly:
 
 ```bash
-terraform state show -json <file> | akashi <path to ruleset> --json
+terraform state show -json <file> | akashi <compare | diff> <path to ruleset> --json
 ```
 
 If the `terraform plan` output or the decoded json is in a file, you can read directly from the file by specifying the path with `-f`.
