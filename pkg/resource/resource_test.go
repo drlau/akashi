@@ -225,6 +225,37 @@ func TestResourceCompareResult(t *testing.T) {
 				},
 			},
 		},
+		"nested enforced value": {
+			resource: &resource{
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": {
+						EnforceChange: map[string]ruleset.EnforceChange{
+							"nested-key": {
+								Value: true,
+							},
+						},
+					},
+				},
+				CompareOptions: &CompareOptions{},
+			},
+			values: map[string]interface{}{
+				"key": map[string]interface{}{
+					"nested-key": true,
+				},
+			},
+			expected: &CompareResult{
+				Enforced: map[string]interface{}{
+					"key.nested-key": ruleset.EnforceChange{
+						Value: true,
+					},
+				},
+				Failed:          map[string]interface{}{},
+				Ignored:         map[string]interface{}{},
+				Extra:           map[string]interface{}{},
+				MissingEnforced: map[string]interface{}{},
+				MissingIgnored:  map[string]interface{}{},
+			},
+		},
 	}
 
 	for name, tc := range cases {

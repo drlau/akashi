@@ -43,69 +43,19 @@ func NewResourceFromConfig(resourceIdentifier ruleset.ResourceIdentifier, resour
 }
 
 func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
-	enforcedArgs := make(map[string]interface{})
-	failedArgs := make(map[string]interface{})
-	ignored := make(map[string]interface{})
-	extraArgs := make(map[string]interface{})
-
-	// Passed in the plan's values
-	// Iterate over each key/value
-	for k, v := range values {
-		// If the key is ignored, record and continue
-		if _, ok := r.Ignored[k]; ok {
-			ignored[k] = true
-			continue
-		}
-		// If the key is enforced...
-		if enforced, ok := r.Enforced[k]; ok {
-			switch {
-			case enforced.Value != nil:
-				// Verify the value is what is expected
-				if !equal(enforced.Value, v) {
-					// Not equal - record as failed
-					failedArgs[k] = FailedArg{
-						Expected: enforced.Value,
-						Actual:   v,
-					}
-				} else {
-					// equal
-					enforcedArgs[k] = enforced
-				}
-			case enforced.MatchAny != nil:
-				found := false
-				for _, val := range enforced.MatchAny {
-					// Verify the value is what is expected
-					if equal(val, v) {
-						// equal
-						enforcedArgs[k] = enforced
-						found = true
-						break
-					}
-				}
-				if !found {
-					failedArgs[k] = FailedArg{
-						Expected: fmt.Sprintf("one of: %v", enforced.MatchAny),
-						Actual:   v,
-						MatchAny: true,
-					}
-				}
-			default:
-				// TODO: Tests that key exists and that's it - intended?
-			}
-			// key is not enforced or ignored
-		} else {
-			extraArgs[k] = true
-		}
+	result := &CompareResult{
+		Enforced: make(map[string]interface{}),
+		Failed:   make(map[string]interface{}),
+		Ignored:  make(map[string]interface{}),
+		Extra:    make(map[string]interface{}),
 	}
 
-	return &CompareResult{
-		Enforced:        enforcedArgs,
-		Failed:          failedArgs,
-		Ignored:         ignored,
-		Extra:           extraArgs,
-		MissingEnforced: setDifference(enforcedSetDifference(r.Enforced, enforcedArgs), failedArgs),
-		MissingIgnored:  setDifference(setDifference(r.Ignored, ignored), failedArgs),
-	}
+	result.checkValues(r.Enforced, r.Ignored, values, "")
+
+	result.MissingEnforced = setDifference(enforcedSetDifference(make(map[string]interface{}), "", r.Enforced, result.Enforced), result.Failed)
+	result.MissingIgnored = setDifference(setDifference(r.Ignored, result.Ignored), result.Failed)
+
+	return result
 }
 
 func (r *resource) Compare(rv ResourceValues) bool {
@@ -206,10 +156,14 @@ func setDifference(a, b map[string]interface{}) map[string]interface{} {
 
 // enforcedSetDifference returns elements in A but not in B
 // only checks for key equality - ignores values
-func enforcedSetDifference(a map[string]ruleset.EnforceChange, b map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
+func enforcedSetDifference(result map[string]interface{}, keyPrefix string, a map[string]ruleset.EnforceChange, b map[string]interface{}) map[string]interface{} {
 	for k, v := range a {
-		if _, ok := b[k]; !ok {
+		if keyPrefix != "" {
+			k = fmt.Sprintf("%s.%s", keyPrefix, k)
+		}
+		if v.EnforceChange != nil {
+			result = enforcedSetDifference(result, k, v.EnforceChange, b)
+		} else if _, ok := b[k]; !ok {
 			result[k] = v
 		}
 	}

@@ -77,6 +77,7 @@ type ResourceRules struct {
 }
 
 type EnforceChange struct {
-	Value    interface{}   `yaml:"value,omitempty"`
-	MatchAny []interface{} `yaml:"matchAny,omitempty"`
+	Value         interface{}              `yaml:"value,omitempty"`
+	MatchAny      []interface{}            `yaml:"matchAny,omitempty"`
+	EnforceChange map[string]EnforceChange `yaml:",inline"`
 }
