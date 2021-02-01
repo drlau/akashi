@@ -492,6 +492,38 @@ func TestResourceCompare(t *testing.T) {
 			},
 			expected: false,
 		},
+		"enforced value in matchAny": {
+			resource: &resource{
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": {
+						MatchAny: []interface{}{"value1", "value2"},
+					},
+				},
+				CompareOptions: &CompareOptions{},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value1",
+				},
+			},
+			expected: true,
+		},
+		"enforced value not in matchAny": {
+			resource: &resource{
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": {
+						MatchAny: []interface{}{"value1", "value2"},
+					},
+				},
+				CompareOptions: &CompareOptions{},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: false,
+		},
 	}
 
 	for name, tc := range cases {
@@ -524,7 +556,7 @@ func TestResourceDiff(t *testing.T) {
 					"key": "value",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"enforced value does not match": {
 			resource: &resource{
@@ -565,7 +597,7 @@ func TestResourceDiff(t *testing.T) {
 					"ignored": "ignored",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"extra value": {
 			resource: &resource{
@@ -604,7 +636,7 @@ func TestResourceDiff(t *testing.T) {
 					"ignored": "ignored",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"missing enforced value": {
 			resource: &resource{
@@ -623,7 +655,7 @@ func TestResourceDiff(t *testing.T) {
 					"key": "value",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"missing enforced value with EnforceAll": {
 			resource: &resource{
@@ -661,7 +693,7 @@ func TestResourceDiff(t *testing.T) {
 					"key": "value",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"ignored arg with extra value": {
 			resource: &resource{
@@ -696,7 +728,7 @@ func TestResourceDiff(t *testing.T) {
 					"second": "value",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"values is missing a key from ignored or enforced": {
 			resource: &resource{
@@ -717,7 +749,7 @@ func TestResourceDiff(t *testing.T) {
 					"enforced": "value",
 				},
 			},
-			expected: []string{""},
+			expected: []string{},
 		},
 		"values is missing a key from ignored or enforced and requireAll is enabled": {
 			resource: &resource{
@@ -776,11 +808,46 @@ func TestResourceDiff(t *testing.T) {
 			},
 			expected: []string{"AutoFail set to true"},
 		},
+		"enforced value in matchAny": {
+			resource: &resource{
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": {
+						MatchAny: []interface{}{"value1", "value2"},
+					},
+				},
+				CompareOptions: &CompareOptions{},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value1",
+				},
+			},
+			expected: []string{},
+		},
+		"enforced value not in matchAny": {
+			resource: &resource{
+				Enforced: map[string]ruleset.EnforceChange{
+					"key": {
+						MatchAny: []interface{}{"value1", "value2"},
+					},
+				},
+				CompareOptions: &CompareOptions{},
+			},
+			values: ResourceValues{
+				Values: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			expected: []string{"one of: [value1 value2]"},
+		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			got := tc.resource.Diff(tc.values)
+			if len(tc.expected) == 0 && got != "" {
+				t.Errorf("Expected no diff but got: \n%v", got)
+			}
 			for _, s := range tc.expected {
 				if !strings.Contains(got, s) {
 					t.Errorf("Result string did not contain %v", s)

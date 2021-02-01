@@ -84,7 +84,7 @@ func (r *resource) CompareResult(values map[string]interface{}) *CompareResult {
 				}
 				if !found {
 					failedArgs[k] = FailedArg{
-						Expected: enforced.MatchAny,
+						Expected: fmt.Sprintf("one of: %v", enforced.MatchAny),
 						Actual:   v,
 						MatchAny: true,
 					}
