@@ -10,6 +10,10 @@ type CreateDeleteResourceChanges struct {
 	// If strict is enabled, all created or deleted resources must match a rule
 	Strict bool `yaml:"strict,omitempty"`
 
+	// If requireName is enabled, all resources must specify the name of the
+	// resource in addition to the resource type
+	RequireName bool `yaml:"requireName",omitempty`
+
 	// Default CompareOptions to use for all resources
 	Default *CompareOptions `yaml:"default,omitempty"`
 
@@ -26,6 +30,10 @@ type CreateDeleteResourceChange struct {
 type UpdateResourceChanges struct {
 	// If strict is enabled, all updated resources must match a rule
 	Strict bool `yaml:"strict,omitempty"`
+
+	// If requireName is enabled, all resources must specify the name of the
+	// resource in addition to the resource type
+	RequireName bool `yaml:"requireName",omitempty`
 
 	// Default CompareOptions to use for all resources
 	Default *CompareOptions `yaml:"default,omitempty"`
