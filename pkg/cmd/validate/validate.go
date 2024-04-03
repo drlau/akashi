@@ -1,12 +1,14 @@
 package validate
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/drlau/akashi/pkg/ruleset"
 
 	"github.com/spf13/cobra"
 )
 
+// TODO: print out which resources are not valid
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validate <path to ruleset>",
@@ -15,15 +17,17 @@ func NewCmd() *cobra.Command {
 
 		// NOTE: We explicitly do not set Args with ExactArgs(1) since that
 		// will not print the help message.
-		PreRunE: func(cmd *cobra.Command, args []string) err {
-			if len(args) == 0 {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
 				cmd.Help()
 				os.Exit(1)
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) err {
-			return nil
+		RunE: func(cmd *cobra.Command, args []string) error {
+			_, err := ruleset.ParseRuleset(args[0])
+			return err
 		},
 	}
+	return cmd
 }

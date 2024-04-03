@@ -10,6 +10,7 @@ import (
 	"github.com/drlau/akashi/internal/compare"
 	comparecmd "github.com/drlau/akashi/pkg/cmd/compare"
 	diffcmd "github.com/drlau/akashi/pkg/cmd/diff"
+	validatecmd "github.com/drlau/akashi/pkg/cmd/validate"
 	versioncmd "github.com/drlau/akashi/pkg/cmd/version"
 	"github.com/drlau/akashi/pkg/plan"
 	"github.com/drlau/akashi/pkg/utils"
@@ -52,6 +53,7 @@ func NewCommand() *cobra.Command {
 
 	cmd.AddCommand(comparecmd.NewCmdCompare())
 	cmd.AddCommand(diffcmd.NewCmdDiff())
+	cmd.AddCommand(validatecmd.NewCmd())
 	cmd.AddCommand(versioncmd.NewCmdVersion(os.Stdout, version))
 
 	return cmd
