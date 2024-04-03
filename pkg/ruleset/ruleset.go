@@ -6,6 +6,10 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type Resource interface {
+	ID() *ResourceIdentifier
+}
+
 type Ruleset struct {
 	CreatedResources   *CreateDeleteResourceChanges `yaml:"createdResources,omitempty"`
 	DestroyedResources *CreateDeleteResourceChanges `yaml:"destroyedResources,omitempty"`
@@ -25,6 +29,10 @@ type CreateDeleteResourceChanges struct {
 
 	// Resources is a list of resource changes to validate against
 	Resources []CreateDeleteResourceChange `yaml:"resources"`
+}
+
+func (r CreateDeleteResourceChange) ID() *ResourceIdentifier {
+	return &r.ResourceIdentifier
 }
 
 type CreateDeleteResourceChange struct {
@@ -54,6 +62,10 @@ type UpdateResourceChange struct {
 
 	Before *ResourceRules `yaml:"before,omitempty"`
 	After  *ResourceRules `yaml:"after,omitempty"`
+}
+
+func (r UpdateResourceChange) ID() *ResourceIdentifier {
+	return &r.ResourceIdentifier
 }
 
 type CompareOptions struct {
