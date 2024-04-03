@@ -28,7 +28,7 @@ func NewCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ruleset, err := ruleset.ParseRuleset(args[0])
-			if res := validate.Validate(ruleset); !res.Valid {
+			if res := validate.Validate(ruleset); !res.IsValid() {
 				return fmt.Errorf("ruleset is invalid")
 			}
 			return err
