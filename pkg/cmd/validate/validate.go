@@ -2,7 +2,9 @@ package validate
 
 import (
 	"os"
+	"fmt"
 
+	"github.com/drlau/akashi/internal/validate"
 	"github.com/drlau/akashi/pkg/ruleset"
 
 	"github.com/spf13/cobra"
@@ -25,7 +27,10 @@ func NewCmd() *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := ruleset.ParseRuleset(args[0])
+			ruleset, err := ruleset.ParseRuleset(args[0])
+			if res := validate.Validate(ruleset); !res.Valid {
+				return fmt.Errorf("ruleset is invalid")
+			}
 			return err
 		},
 	}
