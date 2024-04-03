@@ -1,5 +1,11 @@
 package ruleset
 
+import (
+	"io/ioutil"
+
+	yaml "gopkg.in/yaml.v2"
+)
+
 type Ruleset struct {
 	CreatedResources   *CreateDeleteResourceChanges `yaml:"createdResources,omitempty"`
 	DestroyedResources *CreateDeleteResourceChanges `yaml:"destroyedResources,omitempty"`
@@ -88,4 +94,15 @@ type EnforceChange struct {
 	Value         interface{}              `yaml:"value,omitempty"`
 	MatchAny      []interface{}            `yaml:"matchAny,omitempty"`
 	EnforceChange map[string]EnforceChange `yaml:",inline"`
+}
+
+func ParseRuleset(path string) (Ruleset, error) {
+	var rs Ruleset
+	rulesetFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		return rs, err
+	}
+
+	err = yaml.Unmarshal(rulesetFile, &rs)
+	return rs, err
 }
