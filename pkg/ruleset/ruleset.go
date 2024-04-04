@@ -1,5 +1,16 @@
 package ruleset
 
+import (
+	"fmt"
+	"io/ioutil"
+
+	yaml "gopkg.in/yaml.v2"
+)
+
+type Resource interface {
+	ID() *ResourceIdentifier
+}
+
 type Ruleset struct {
 	CreatedResources   *CreateDeleteResourceChanges `yaml:"createdResources,omitempty"`
 	DestroyedResources *CreateDeleteResourceChanges `yaml:"destroyedResources,omitempty"`
@@ -10,11 +21,19 @@ type CreateDeleteResourceChanges struct {
 	// If strict is enabled, all created or deleted resources must match a rule
 	Strict bool `yaml:"strict,omitempty"`
 
+	// If requireName is enabled, all resources must specify the name of the
+	// resource in addition to the resource type
+	RequireName bool `yaml:"requireName",omitempty`
+
 	// Default CompareOptions to use for all resources
 	Default *CompareOptions `yaml:"default,omitempty"`
 
 	// Resources is a list of resource changes to validate against
 	Resources []CreateDeleteResourceChange `yaml:"resources"`
+}
+
+func (r CreateDeleteResourceChange) ID() *ResourceIdentifier {
+	return &r.ResourceIdentifier
 }
 
 type CreateDeleteResourceChange struct {
@@ -26,6 +45,10 @@ type CreateDeleteResourceChange struct {
 type UpdateResourceChanges struct {
 	// If strict is enabled, all updated resources must match a rule
 	Strict bool `yaml:"strict,omitempty"`
+
+	// If requireName is enabled, all resources must specify the name of the
+	// resource in addition to the resource type
+	RequireName bool `yaml:"requireName",omitempty`
 
 	// Default CompareOptions to use for all resources
 	Default *CompareOptions `yaml:"default,omitempty"`
@@ -40,6 +63,10 @@ type UpdateResourceChange struct {
 
 	Before *ResourceRules `yaml:"before,omitempty"`
 	After  *ResourceRules `yaml:"after,omitempty"`
+}
+
+func (r UpdateResourceChange) ID() *ResourceIdentifier {
+	return &r.ResourceIdentifier
 }
 
 type CompareOptions struct {
@@ -71,6 +98,13 @@ type ResourceIdentifier struct {
 	// Index interface{} `yaml:"index,omitempty"`
 }
 
+func (id *ResourceIdentifier) String() string {
+	if id.Name == "" {
+		return id.Type
+	}
+	return fmt.Sprintf("%s.%s", id.Type, id.Name)
+}
+
 type ResourceRules struct {
 	Enforced map[string]EnforceChange `yaml:"enforced,omitempty"`
 	Ignored  []string                 `yaml:"ignored,omitempty"`
@@ -80,4 +114,15 @@ type EnforceChange struct {
 	Value         interface{}              `yaml:"value,omitempty"`
 	MatchAny      []interface{}            `yaml:"matchAny,omitempty"`
 	EnforceChange map[string]EnforceChange `yaml:",inline"`
+}
+
+func ParseRuleset(path string) (Ruleset, error) {
+	var rs Ruleset
+	rulesetFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		return rs, err
+	}
+
+	err = yaml.Unmarshal(rulesetFile, &rs)
+	return rs, err
 }
