@@ -62,6 +62,11 @@ createdResources:
   # Default is false.
   strict: true
 
+  # Set to true if you want Akashi to validate the ruleset specifies names for
+  # created resources.
+  # Default is false.
+  requireName: true
+
   # Default compare options to apply to all resources.
   # If a resource specifies the same option, the resource's value will be used.
   default:
@@ -149,6 +154,11 @@ updatedResources:
   # Set to true if you want all updated resources to match a rule.
   # Default is false.
   strict: true
+
+  # Set to true if you want Akashi to validate the ruleset specifies names for
+  # updated resources.
+  # Default is false.
+  requireName: true
 
   # Default compare options to apply to all resources.
   # If a resource specifies the same option, the resource's value will be used.
