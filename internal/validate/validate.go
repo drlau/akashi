@@ -1,9 +1,16 @@
 package validate
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/drlau/akashi/pkg/ruleset"
 )
 
+// TODO: currently the only static validation we do is to check if names are
+// present for all resources in the ruleset if RequireName is set. Ideally we
+// should support more validations, so this struct will need to evolve to
+// contain more information about _why_ the resource is invalid.
 type ValidateResult struct {
 	InvalidCreatedResources   []*ruleset.ResourceIdentifier
 	InvalidDestroyedResources []*ruleset.ResourceIdentifier
@@ -20,6 +27,38 @@ func (r *ValidateResult) fill_defaults() {
 	if r.InvalidUpdatedResources == nil {
 		r.InvalidUpdatedResources = make([]*ruleset.ResourceIdentifier, 0)
 	}
+}
+
+func formatResourceIDs(ids []*ruleset.ResourceIdentifier) []string {
+	var lines []string
+	for _, id := range ids {
+		lines = append(lines, fmt.Sprintf("\t- %s", id.String()))
+	}
+	return lines
+}
+
+func (r *ValidateResult) String() string {
+	if r.IsValid() {
+		return "All resources valid!"
+	}
+
+	lines := []string{
+		"Found invalid resources in the ruleset:",
+		"---------------------------------------",
+	}
+	if len(r.InvalidCreatedResources) != 0 {
+		lines = append(lines, "Invalid Created Resources:")
+		lines = append(lines, formatResourceIDs(r.InvalidCreatedResources)...)
+	}
+	if len(r.InvalidDestroyedResources) != 0 {
+		lines = append(lines, "Invalid Destroyed Resources:")
+		lines = append(lines, formatResourceIDs(r.InvalidDestroyedResources)...)
+	}
+	if len(r.InvalidUpdatedResources) != 0 {
+		lines = append(lines, "Invalid Updated Resources:")
+		lines = append(lines, formatResourceIDs(r.InvalidUpdatedResources)...)
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (r *ValidateResult) IsValid() bool {

@@ -1,6 +1,7 @@
 package ruleset
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	yaml "gopkg.in/yaml.v2"
@@ -95,6 +96,13 @@ type ResourceIdentifier struct {
 	Type string `yaml:"type,omitempty"`
 	// TODO: index
 	// Index interface{} `yaml:"index,omitempty"`
+}
+
+func (id *ResourceIdentifier) String() string {
+	if id.Name == "" {
+		return id.Type
+	}
+	return fmt.Sprintf("%s.%s", id.Type, id.Name)
 }
 
 type ResourceRules struct {

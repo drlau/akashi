@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO: print out which resources are not valid
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validate <path to ruleset>",
@@ -28,10 +27,14 @@ func NewCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ruleset, err := ruleset.ParseRuleset(args[0])
-			if res := validate.Validate(ruleset); !res.IsValid() {
-				return fmt.Errorf("ruleset is invalid")
+			if err != nil {
+				return fmt.Errorf("Could not parse ruleset: %v", err)
 			}
-			return err
+			if res := validate.Validate(ruleset); !res.IsValid() {
+				return fmt.Errorf("%s", res.String())
+			}
+			fmt.Println("Ruleset is valid!")
+			return nil
 		},
 	}
 	return cmd
