@@ -62,7 +62,7 @@ createdResources:
   # Default is false.
   strict: true
 
-  # Set to true if you want Akashi to validate the ruleset specifies names for
+  # Set to true if you want to validate the ruleset specifies names for
   # created resources.
   # Default is false.
   requireName: true
@@ -155,7 +155,7 @@ updatedResources:
   # Default is false.
   strict: true
 
-  # Set to true if you want Akashi to validate the ruleset specifies names for
+  # Set to true if you want to validate the ruleset specifies names for
   # updated resources.
   # Default is false.
   requireName: true
