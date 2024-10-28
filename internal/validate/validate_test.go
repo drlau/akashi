@@ -3,8 +3,8 @@ package validate
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/drlau/akashi/pkg/ruleset"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestValidate(t *testing.T) {
