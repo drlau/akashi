@@ -1,8 +1,8 @@
 package validate
 
 import (
-	"os"
 	"fmt"
+	"os"
 
 	"github.com/drlau/akashi/internal/validate"
 	"github.com/drlau/akashi/pkg/ruleset"
